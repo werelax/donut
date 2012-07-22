@@ -227,6 +227,7 @@ declare_comparison('<');
 declare_comparison('>');
 declare_comparison('=<');
 declare_comparison('=>');
+declare_comparison('=', '==');
 declare_comparison('and', '&&');
 declare_comparison('or', '||');
 
@@ -284,11 +285,20 @@ def_special_form('fn', function(fname, args) {
   return "(function " + params + " { " + compile(body) + " })";
 });
 
-/* Test */
+/* Invocation */
 
-var code = "(this (is some) (kind (of lispy)) code)";
+// node jungle.js <file .jngl>
 
-/* PENDING:
+require('fs').readFile(process.argv[2], 'utf-8', function(err, data) {
+  if (err) throw err;
+  console.log(data);
+  console.log( parse(data).map(compile).join("\n"));
+});
+
+
+/* Pending */
+
+/*
 * (quote (a b c d)) -> (a b c d)
 * (def a 2 b 3) -> var a = 2, b = 3;
 * (set a 43)    -> a = 43
@@ -304,27 +314,3 @@ var code = "(this (is some) (kind (of lispy)) code)";
 * map filter etc...
 * list, hash, vector constructors
 */
-
-var jungle_1 =
-  "\
-    (fn [a b] (alert (+ a b))) \
-    ((fn [a b] (alert (+ a b))) 1 2) \
-    (console.log 'akandemorl' (add 1 4) 'and then some') \
-    (alert (sub 5 2) (messages)) \
-    (+ 1 2 3 4 5) \
-    (- 1 2 3 4 5) \
-    (* 1 2 3 4 5) \
-    (/ (- 100 (+ 2 1)) 1 2 3 4 5) \
-    (% 10 2) \
-    (< 10 2 1) \
-    (> 10 2) \
-    (and true 2) \
-    (or true 2 false) \
-    (not (< 10 2)) \
-    [1 2 3 4 5] \
-    {a 1 b 2 c 3} \
-    (if (this 'should be false')\
-     (alert 'akandemorl') \
-     (alert 'always false'))";
-
-console.log( parse(jungle_1).map(compile).join("\n"));
