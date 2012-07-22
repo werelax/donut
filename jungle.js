@@ -279,16 +279,14 @@ def_special_form('if', function(fname, args) {
 def_special_form('fn', function(fname, args) {
   var params = args.shift(),
       body = args.shift(),
-      vect_to_fn = function(v) { return v.replace('[','(').replace(']',')'); };
-  params = vect_to_fn(compile(params));
+      vect_to_list = function(v) { return v.replace('[','(').replace(']',')'); };
+  params = vect_to_list(compile(params));
   return "(function " + params + " { " + compile(body) + " })";
 });
 
 /* Test */
 
 var code = "(this (is some) (kind (of lispy)) code)";
-
-// var just_atom = "jarl jorl \"some string\" 'another string'";
 
 /* PENDING:
 * (quote (a b c d)) -> (a b c d)
@@ -298,6 +296,7 @@ var code = "(this (is some) (kind (of lispy)) code)";
 * ? (set (get a 'some-key') 12) -> a['some-key'] = 12
 * ? (conj a 'some-key' 12) -> a['some-key'] = 12
 * ? (prop-set a 'some-key' 12) -> a['some-key'] = 12
+* progn or some kind of block
 * (let [a 2] body) -> (function(a) { body })(2)
 * some kind of defmacro
 * defn
