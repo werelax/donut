@@ -1,5 +1,4 @@
 var format = require('util').format;
-var ast = require('./ast.js');
 
 /* Reader primitives */
 
@@ -90,11 +89,11 @@ def_prefix_reader_macro("'", function(stream) {
 });
 
 def_delimited_reader_macro("[", function(stream) {
-  return format("(vector %s)", strip_delimiters(stream));
+  return format("(make-vector %s)", strip_delimiters(stream));
 });
 
 def_delimited_reader_macro("{", function(stream) {
-  return format("(hash %s)", stream);
+  return format("(make-object %s)", stream);
 });
 
 /* Readers */
@@ -158,16 +157,18 @@ function select_reader (stream) {
 
 /* Main reader utilities */
 
+/* Parsers */
+
 var parsers = {
   'symbol': function(stream) {
-    return new ast.Symbol(stream);
+    return stream.trim();
   },
   'string': function(stream) {
-    return new ast.String(stream);
+    return stream.trim();
   },
   'list': function(stream) {
     var items = read(strip_delimiters(stream));
-    return new ast.List(items);
+    return items;
   }
 };
 

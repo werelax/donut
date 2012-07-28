@@ -1,0 +1,32 @@
+(console.log "akandemorl")
+(console.log (+ (* 2 3) 10))
+(console.log [1 2 3 4])
+(console.log {a 1 b 2 c 3})
+
+(console.log '(1 2 (1 2 3) 3 4))
+
+(console.log (car '(1 2 3)))
+(console.log (cdr '(1 2 3)))
+
+(console.log (cons 1 '(2 3)))
+(console.log (cons 1 '()))
+
+(define a 2 b 1 c (+ 3 3))
+(console.log '(a b c))
+
+((lambda (a b)
+   (define sum (+ a b))
+   (console.log "The sum was: " sum))
+ 10 2)
+
+(define sumator
+  (lambda (a b)
+    (console.log "THE SUM WAS: " (+ a b))))
+
+(sumator 1 2)
+
+(set! sumator
+     (lambda (a b)
+       (console.log "STOP BUGGING ME!")))
+
+(sumator "akandemorl")

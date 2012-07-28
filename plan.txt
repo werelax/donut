@@ -8,7 +8,7 @@
 - implement [] and {} as reader macros for (vec a b c) and (hash a b c)
 
 - Data types:
-  * List
+  ! List -> Bad Idea! Difficult to fly close to JS with Lists
   + Vector
   + Hash/Object
   * String
@@ -22,3 +22,10 @@
 * Programable? => Just transformations + recursive call to read
 * delimiter: SPAC
 * Should be an FSM?
+
+== The LIST problem
+
+* Using a non-js-native structure as the LIST is getting on the way of a clean, thin syntax wrapper over vainilla js.
+* A lot of extrange cases are arising when the translation DONUT->JS is not so clear
+* So I'm sending lists to hell and using arrays instead. DONUT LIST = JS array. And fuck it.
+* Also, the syntax tree will be just nested arrays.
