@@ -7,12 +7,15 @@ var reader = require('./reader.js');
 var special_forms = {};
 
 function compile(ast) {
-  var fname, fargs, transformation;
+  var fname, fargs, transformation, js_code;
   if (_.isArray(ast)) {
     fname = compile(ast[0]);
     args = ast.slice(1);
+    // This is when we should check first if the AST node is a macro!
     transformation = special_forms[fname] || special_forms['_function_call'];
-    return transformation(fname, args);
+    js_code = transformation(fname, args);
+    // This is the best point to inject the macro meta-evaluation of defines!
+    return js_code;
   } else {
     return ast;
   }
@@ -155,7 +158,9 @@ def_special_form('define_dash_lambda', function(fname, args) {
       lambda_name = lambda_expr[0],
       lambda_params = lambda_expr.slice(1),
       body = args.slice(1);
-  return format("var %s = %s", lambda_name, special_forms['lambda'](fname, [lambda_params].concat(body)));
+  return format("var %s = %s",
+                lambda_name,
+                special_forms['lambda'](fname, [lambda_params].concat(body)));
 });
 
 def_special_form('set!', function(fname, args) {
@@ -194,7 +199,38 @@ def_special_form('lambda', function(fname, args) {
       last = body.pop();
   // just to make .join() add an ending ;
   body.push('');
-  return format("(function(%s) {\n %s return %s;\n })", params, body.join(";\n"), last);
+  return format("(function(%s) {\n %s return %s;\n })",
+                params,
+                body.join(";\n"),
+                last);
+});
+
+def_special_form('progn', function(fname, args) {
+  var body = args.map(compile),
+      last = body.pop();
+  // just to make .join() add an ending ;
+  body.push('');
+  return format("%s", body.join(";\n"));
+});
+
+/* Environment operations */
+
+def_special_form('let', function(fname, args) {
+  var bindings = args[0],
+      names = [],
+      values = [],
+      body = args.slice(1).map(compile),
+      last = body.pop();
+  body.push('');
+  bindings.forEach(function(b) {
+    names.push(b[0]);
+    values.push(compile(b[1]));
+  });
+  return format("(function(%s){ %s return %s;\n })(%s)",
+                names.join(", "),
+                body.join(";\n"),
+                last,
+                values.join(", "));
 });
 
 /* Invocation */
@@ -221,14 +257,13 @@ require('fs').readFile(process.argv[2], 'utf-8', function(err, data) {
 ✓ (set a 43)    -> a = 43
 ✓ defn
 ✓ (get a 'some-key') -> a['some-key']
+✓ progn or some kind of block
+✓ (let [a 2] body) -> (function(a) { body })(2)
+✓ list, hash, vector constructors (with some NOTES)
 
-* ? (set (get a 'some-key') 12) -> a['some-key'] = 12
-* ? (conj a 'some-key' 12) -> a['some-key'] = 12
-* ? (prop-set a 'some-key' 12) -> a['some-key'] = 12
-* progn or some kind of block
-* (let [a 2] body) -> (function(a) { body })(2)
 * some kind of defmacro
+
+-> this is just library work
 * while, for, when, unless, cond, if-let, when-let
 * map filter etc...
-* list, hash, vector constructors
 */
