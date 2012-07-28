@@ -1,0 +1,17 @@
+1. Decent reader
+1b. Decent AST
+2. Symbol/var assignment
+3. Macro system
+
+== Notes
+
+- implement [] and {} as reader macros for (vec a b c) and (hash a b c)
+
+- Data types:
+  * List
+  * Vector
+  * Hash/Object
+  * String
+  * Number
+  * Symbol
+  *? Keyword

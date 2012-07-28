@@ -281,11 +281,10 @@ def_special_form('if', function(fname, args) {
 
 // Base function operations
 
-def_special_form('fn', function(fname, args) {
+def_special_form('lambda', function(fname, args) {
   var params = args.shift(),
-      body = args.shift(),
-      vect_to_list = function(v) { return v.replace('[','(').replace(']',')'); };
-  params = vect_to_list(compile(params));
+      body = args.shift();
+  params = compile(params);
   return "(function " + params + " { " + compile(body) + " })";
 });
 

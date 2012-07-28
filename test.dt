@@ -1,5 +1,5 @@
-(fn [a b] (alert (+ a b)))
-((fn [a b] (alert (+ a b))) 1 2)
+(lambda (a b) (alert (+ a b)))
+((lambda (a b) (alert (+ a b))) 1 2)
 (console.log 'akandemorl' (add 1 4) 'and then some')
 (alert (sub 5 2) (messages))
 (+ 1 2 3 4 5)
