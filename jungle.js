@@ -84,6 +84,8 @@ function end_of_hash(code) {
   return end_of_sequence(code, '{', '}');
 }
 
+/* Lexer */
+
 function read_atom (code) {
   var atom_ending_chars = ["\"", "'", "(", ")", " "],
       is_natural = function(n) { return n >= 0; },
@@ -129,6 +131,8 @@ function read_hash (code) {
   result[0] = new Hash(result[0]);
   return result;
 }
+
+/* Here be reader macros */
 
 function read (code) {
   code = cleanup(code);
