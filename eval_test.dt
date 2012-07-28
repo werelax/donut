@@ -19,9 +19,8 @@
    (console.log "The sum was: " sum))
  10 2)
 
-(define sumator
-  (lambda (a b)
-    (console.log "THE SUM WAS: " (+ a b))))
+(define (sumator a b)
+  (console.log "THE SUM WAS: " (+ a b)))
 
 (sumator 1 2)
 
@@ -31,10 +30,9 @@
 
 (sumator "akandemorl")
 
-(define make-adder
-  (lambda (n)
-    (lambda (x)
-      (+ x n))))
+(define (make-adder n)
+  (lambda (x)
+    (+ x n)))
 
 (define plus-10 (make-adder 10))
 (console.log (plus-10 3))

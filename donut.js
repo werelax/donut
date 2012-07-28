@@ -143,10 +143,19 @@ function in_groups_of(list, n) {
 }
 
 def_special_form('define', function(fname, args) {
+  if (_.isArray(args[0])) return special_forms['define_dash_lambda'](fname, args);
   var pairs = in_groups_of(args, 2),
       expansion = function (p) { return format("var %s = %s", compile(p[0]), p[1]? compile(p[1]):"undefined"); }
       definitions = pairs.map(expansion);
   return definitions.join('; ');
+});
+
+def_special_form('define_dash_lambda', function(fname, args) {
+  var lambda_expr = args[0],
+      lambda_name = lambda_expr[0],
+      lambda_params = lambda_expr.slice(1),
+      body = args.slice(1);
+  return format("var %s = %s", lambda_name, special_forms['lambda'](fname, [lambda_params].concat(body)));
 });
 
 def_special_form('set!', function(fname, args) {
@@ -200,9 +209,10 @@ require('fs').readFile(process.argv[2], 'utf-8', function(err, data) {
 
 /*
 ✓ (quote (a b c d)) -> (a b c d)
+✓ (def a 2 b 3) -> var a = 2, b = 3;
+✓ (set a 43)    -> a = 43
+✓ defn
 
-* (def a 2 b 3) -> var a = 2, b = 3;
-* (set a 43)    -> a = 43
 * (get a 'some-key') -> a['some-key']
 * ? (set (get a 'some-key') 12) -> a['some-key'] = 12
 * ? (conj a 'some-key' 12) -> a['some-key'] = 12
@@ -210,7 +220,6 @@ require('fs').readFile(process.argv[2], 'utf-8', function(err, data) {
 * progn or some kind of block
 * (let [a 2] body) -> (function(a) { body })(2)
 * some kind of defmacro
-* defn
 * while, for, when, unless, cond, if-let, when-let
 * map filter etc...
 * list, hash, vector constructors
