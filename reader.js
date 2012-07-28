@@ -156,7 +156,7 @@ function select_reader (stream) {
          || select_from_collection(readers, stream);
 }
 
-/* Parsers */
+/* Main reader utilities */
 
 var parsers = {
   'symbol': function(stream) {
@@ -170,8 +170,6 @@ var parsers = {
     return new ast.List(items);
   }
 };
-
-/* Main reader utilities */
 
 function parse (token) {
   var parser = parsers[token.type];
@@ -196,7 +194,7 @@ function read (code, tree) {
   var step = read_token(code),
       token = step[0],
       remainder = step[1].trim();
-  if (token) { tree.push( parse(token)); }
+  tree.push( parse(token));
   if (remainder.length == 0) {
     return tree;
   } else {

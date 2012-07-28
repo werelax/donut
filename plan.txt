@@ -1,4 +1,4 @@
-1. Decent reader
+* 1. Decent reader
 1b. Decent AST
 2. Symbol/var assignment
 3. Macro system
@@ -9,9 +9,16 @@
 
 - Data types:
   * List
-  * Vector
-  * Hash/Object
+  + Vector
+  + Hash/Object
   * String
   * Number
   * Symbol
   *? Keyword
+  (so more or less just js data types)
+
+== Decent reader:
+
+* Programable? => Just transformations + recursive call to read
+* delimiter: SPAC
+* Should be an FSM?
