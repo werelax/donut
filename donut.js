@@ -206,11 +206,8 @@ def_special_form('lambda', function(fname, args) {
 });
 
 def_special_form('progn', function(fname, args) {
-  var body = args.map(compile),
-      last = body.pop();
-  // just to make .join() add an ending ;
-  body.push('');
-  return format("%s", body.join(";\n"));
+  // Beware!: progn creates lexical environments!
+  return special_forms['let'](fname, [[]].concat(args));
 });
 
 /* Environment operations */
