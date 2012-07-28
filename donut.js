@@ -77,12 +77,12 @@ def_special_form('_function_call', function(fname, args) {
   return fname + "(" + args.map(compile).join(', ') + ")";
 });
 
-def_special_form('make-vector', function(fname, args) {
+def_special_form('make_dash_vector', function(fname, args) {
   // alias of (list ...)
   return special_forms['list'](fname, args);
 });
 
-def_special_form('make-object', function(fname, args) {
+def_special_form('make_dash_object', function(fname, args) {
   var args = args.map(compile),
       props = [],
       key,
@@ -144,9 +144,9 @@ function in_groups_of(list, n) {
 
 def_special_form('define', function(fname, args) {
   var pairs = in_groups_of(args, 2),
-      expansion = function (p) { return format("var %s = %s;", compile(p[0]), p[1]? compile(p[1]):"undefined"); }
+      expansion = function (p) { return format("var %s = %s", compile(p[0]), p[1]? compile(p[1]):"undefined"); }
       definitions = pairs.map(expansion);
-  return definitions.join(' ');
+  return definitions.join('; ');
 });
 
 def_special_form('set!', function(fname, args) {
@@ -173,9 +173,11 @@ def_special_form('if', function(fname, args) {
 
 def_special_form('lambda', function(fname, args) {
   var params = args[0].map(compile),
-      body = args.slice(1).map(compile);
-  console.log(body);
-  return "(function (" + params + ") { \n" + body.join(";\n") + " \n})";
+      body = args.slice(1).map(compile),
+      last = body.pop();
+  // just to make .join() add an ending ;
+  body.push('');
+  return format("(function(%s) {\n %s return %s;\n })", params, body.join(";\n"), last);
 });
 
 /* Invocation */

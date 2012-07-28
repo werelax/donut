@@ -30,3 +30,11 @@
        (console.log "STOP BUGGING ME!")))
 
 (sumator "akandemorl")
+
+(define make-adder
+  (lambda (n)
+    (lambda (x)
+      (+ x n))))
+
+(define plus-10 (make-adder 10))
+(console.log (plus-10 3))

@@ -159,9 +159,13 @@ function select_reader (stream) {
 
 /* Parsers */
 
+function to_js_name(string) {
+  return string.replace('-', '_dash_');
+}
+
 var parsers = {
   'symbol': function(stream) {
-    return stream.trim();
+    return to_js_name(stream.trim());
   },
   'string': function(stream) {
     return stream.trim();
