@@ -164,6 +164,14 @@ def_special_form('set!', function(fname, args) {
   return format("(%s = %s)", symbol, value);
 });
 
+// Hash/Object operations
+
+def_special_form('get', function(fname, args) {
+  var index = compile(args[0]),
+      obj = compile(args[1]);
+  return format("(%s[%s])", obj, index);
+});
+
 // Base flow operations
 
 def_special_form('if', function(fname, args) {
@@ -191,7 +199,7 @@ def_special_form('lambda', function(fname, args) {
 
 /* Invocation */
 
-// node jungle.js <file .jngl>
+// node donut.js <file.dt>
 
 require('fs').readFile(process.argv[2], 'utf-8', function(err, data) {
   if (err) throw err;
@@ -212,8 +220,8 @@ require('fs').readFile(process.argv[2], 'utf-8', function(err, data) {
 ✓ (def a 2 b 3) -> var a = 2, b = 3;
 ✓ (set a 43)    -> a = 43
 ✓ defn
+✓ (get a 'some-key') -> a['some-key']
 
-* (get a 'some-key') -> a['some-key']
 * ? (set (get a 'some-key') 12) -> a['some-key'] = 12
 * ? (conj a 'some-key' 12) -> a['some-key'] = 12
 * ? (prop-set a 'some-key' 12) -> a['some-key'] = 12

@@ -88,6 +88,10 @@ def_prefix_reader_macro("'", function(stream) {
   return format("(quote %s)", stream);
 });
 
+def_prefix_reader_macro(":", function(stream) {
+  return format("\"%s\"", stream.trim());
+});
+
 def_delimited_reader_macro("[", function(stream) {
   return format("(make-vector %s)", strip_delimiters(stream));
 });

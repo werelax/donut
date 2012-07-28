@@ -36,3 +36,10 @@
 
 (define plus-10 (make-adder 10))
 (console.log (plus-10 3))
+
+(define hash {})
+(set! (get :jarl hash) 1)
+(console.log (get :jarl hash))
+
+(define my-array [1 2 3 4 5])
+(console.log "peeking into my-array: " (get 1 my-array))
