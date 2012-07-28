@@ -68,6 +68,8 @@ macro_akan(1 2 3)
      all the named functions as we find them
 1.d) I think I should just eval ALL the (DEFINE ...) forms for building an coherent
      temporal ENVIRONMENT for the macroexpansion
+1.e) BEWARE!!!: The environments nest and the (DEFINE...) expressions can have very
+     different meanings!! I don't see how to EVAL them correctly
 
 2) When compiling, if we find some macro call, whe substitute the WHOLE NODE
    with the result OF EXECUTING the macro function!
@@ -86,3 +88,14 @@ macro_akan(1 2 3)
 (defmacro forty-two () 42)
 
 - And try to make all the machinery work just for substitute every call to (forty-two) with 42
+
+== ENVIRONMENT BUILDING
+
+* The evaluation-as-we-go of (DEFINE...) expressions has proven a to be bad approach.
+* I'm thinking in something more sophisticated: code-walking the AST and simulating the
+  environments as we go.
+  - Each time we find a LAMBDA oR LET and descend into its childs, we create a new layer of
+    "faked environment".
+  - every (DEFINE) encountered is pseudo-compiled against the faked environment collected
+  - the macros are expanded against this fake environment
+  - when we pop out of the LET/LAMBDA node, the last layer of faked environment is deleted

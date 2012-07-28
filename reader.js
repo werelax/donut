@@ -213,4 +213,4 @@ function read (code, tree) {
 
 // Only exports the main entry point
 
-exports.read = read;
+exports['read'] = read;
