@@ -2,6 +2,14 @@ var _ = require('underscore');
 var format = require('util').format;
 var read = require('./reader.js').read;
 
+/* global utils */
+
+var symbol_id_counter = 0;
+
+function gensym () {
+  return "__symb__" + symbol_id_counter++ + "__";
+}
+
 /* Transformations */
 
 var special_forms = {};
@@ -206,7 +214,6 @@ def_special_form("cond", function(fname, args) {
         var clause = clauses[0],
             condition = clause[0],
             body = clause.slice(1);
-        console.log("CONDITION: ", condition)
         if (condition == "else") {
           return special_forms['progn'](fname, body);
         } else {
@@ -218,6 +225,32 @@ def_special_form("cond", function(fname, args) {
         }
       };
       return cond_rec(args);
+});
+
+def_special_form("case", function(fname, args) {
+  function expand_clause (clause) {
+    // the [].concat(..) trick makes sure it ends as an array
+    var value_list = ([].concat(clause[0])).map(compile),
+        value_code = value_list.map(function(v) {
+          if (v == 'else') {
+            return "default:";
+          } else {
+            return format("case %s:\n", v);
+          }
+        }).join(''),
+        body = clause.slice(1).map(compile),
+        last = format("return %s;", body.pop()),
+        body_code = body.concat([last, "break", ""]).join(";\n") ;
+    return value_code + body_code;
+  }
+  var test = compile(args[0]),
+      clauses = args.slice(1),
+      symb = gensym();
+  return format("(function(%s) { switch(%s) { %s }})(%s);",
+                symb,
+                symb,
+                clauses.map(expand_clause).join(''),
+                test);
 });
 
 // Base function operations

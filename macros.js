@@ -5,7 +5,9 @@
 (define *context* (list {}))
 
 (define (create-context? expr)
- (eq? (car expr) "define"))
+ (case (car expr)
+  (("define" "lambda" "let") true)
+  (else false)))
 
 (define (add-to-context expr)
   (let ((symbol (get 1 expr))
@@ -24,11 +26,12 @@
   (let ((expr (car ast)))
    (if (not expr)
      '()
-     (cons (walk-code (cdr ast))
+     (cons
        (cond
          ((create-context? expr) (add-to-context expr))
          ((is-macroexpand? expr) (expand-macro expr))
-         (else expr))))))
+         (else expr))
+       (walk-code (cdr ast))))))
 
 (let ((read-file (get :readFile (require "fs"))))
   (read-file (get 3 process.argv)
