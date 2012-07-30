@@ -1,4 +1,14 @@
 (define a 1)
 
-(define (jarl a)
-  (console.log a))
+(define b (+ a 1))
+
+(lambda (a)
+  (let ((a 1))
+    (+ a a a)))
+
+(let ((c 1)
+      (d (+ 4 5)))
+  (console.log c d))
+
+;(define (jarl a)
+;  (console.log a))

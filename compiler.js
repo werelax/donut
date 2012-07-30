@@ -107,6 +107,11 @@ def_special_form('make_dash_object', function(fname, args) {
   return "{" + props.join(", ") + "}";
 });
 
+def_special_form("str", function(fname, args) {
+  var result = args.map(compile).join('');
+  return format("\"%s\"", result);
+})
+
 // Basic "LIST" operations
 
 def_special_form('list', function(fname, args) {
@@ -140,6 +145,26 @@ def_special_form('car', function(fname, args) {
 def_special_form('cdr', function(fname, args) {
   var list = compile(args[0]);
   return format("( %s.slice(1) )", list);
+});
+
+def_special_form('nth', function(fname, args) {
+  var index = compile(args[0]),
+      list = compile(args[1]);
+  return format("(%s[%s])", list, index);
+});
+
+def_special_form('cadr', function(fname, args) {
+  return special_forms['nth'](fname, [1].concat(args));
+});
+
+def_special_form('caddr', function(fname, args) {
+  return special_forms['nth'](fname, [2].concat(args));
+});
+
+def_special_form('map', function(fname, args) {
+  var fn = compile(args[0]),
+      list = compile(args[1]);
+  return format("((%s).map(%s))", list, fn);
 });
 
 // Base assignment operations
