@@ -164,7 +164,8 @@ function select_reader (stream) {
 /* Parsers */
 
 function to_js_name(string) {
-  return string.replace('-', '_dash_');
+  return string.replace(/-/g, '_dash_')
+               .replace(/\*/g, '_star_');
 }
 
 var parsers = {
@@ -196,11 +197,15 @@ function read_token (code) {
   }
 }
 
+function strip_comments(code) {
+  return code.replace(/;.*\n/g, '');
+}
+
 /* Main READ entry point */
 
 function read (code, tree) {
   tree || (tree = []);
-  var step = read_token(code),
+  var step = read_token(strip_comments(code)),
       token = step[0],
       remainder = step[1].trim();
   tree.push( parse(token));

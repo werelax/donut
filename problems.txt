@@ -1,0 +1,3 @@
+* (define jarl [{}])
+  - no compila, se hace un lío parseando {}
+  - funciona con (define jarl (list {}))

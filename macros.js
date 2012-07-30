@@ -1,8 +1,12 @@
 (define read (get :read (require "./reader.js"))
         compile (get :compile (require "./compiler.js")))
 
-(define (expand-macros ast context)
-  (console.log ast))
+(define *context* (list {}))
+
+(define (expand-macros ast)
+  (console.log ast)
+  ;; lets get to the thing!
+)
 
 (let ((read-file (get :readFile (require "fs"))))
   (read-file (get 3 process.argv)

@@ -1,6 +1,6 @@
 var _ = require('underscore');
 var format = require('util').format;
-var reader = require('./reader.js');
+var read = require('./reader.js').read;
 
 /* Transformations */
 
@@ -194,14 +194,36 @@ def_special_form('if', function(fname, args) {
 
 // Base function operations
 
+function params_helpers(params) {
+  var len = params.length,
+      helper_code = "",
+      param, name, value;
+  for (var i=0; i<len; i++) {
+    param = params[i];
+    if (_.isArray(param)) {
+      name = param[0];
+      value = param[1];
+      helper_code += format("%s || (%s = %s); ",
+                            name,
+                            name,
+                            compile(value));
+      params[i] = name;
+    }
+  }
+  return [params, helper_code];
+}
+
 def_special_form('lambda', function(fname, args) {
-  var params = args[0].map(compile),
+  var parsed_params = params_helpers(args[0]),
+      params = parsed_params[0].map(compile),
+      params_helper_code = parsed_params[1],
       body = args.slice(1).map(compile),
       last = body.pop();
   // just to make .join() add an ending ;
   body.push('');
-  return format("(function(%s) {\n %s return %s;\n })",
+  return format("(function(%s) {\n %s \n %s return %s;\n })",
                 params,
+                params_helper_code,
                 body.join(";\n"),
                 last);
 });
