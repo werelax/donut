@@ -1,0 +1,4 @@
+(define a 1)
+
+(define (jarl a)
+  (console.log a))

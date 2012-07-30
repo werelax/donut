@@ -183,11 +183,13 @@ def_special_form('if', function(fname, args) {
       if_block = args[1],
       else_block = args[2],
       expanded = "";
-  expanded += "if (" + compile(condition) + ")\n";
-  expanded += "{\n" + compile(if_block);
-  if (else_block) { expanded += "\n} else {\n " + compile(else_block); }
-  expanded += "\n}\n";
-  return expanded;
+  // This little trick works for now. But it would
+  // be better to implement this properly.
+  // The problem was: "if" should be expressions, not statements
+  return format("((%s) ? (%s) : (%s))",
+                compile(condition),
+                compile(if_block),
+                (else_block ? compile(else_block) : void 0));
 });
 
 // Base function operations
@@ -205,8 +207,7 @@ def_special_form('lambda', function(fname, args) {
 });
 
 def_special_form('progn', function(fname, args) {
-  // Beware!: progn creates lexical environments!
-  return special_forms['let'](fname, [[]].concat(args));
+  return format("( %s )", args.map(compile).join(', '));
 });
 
 /* Environment operations */
