@@ -3,10 +3,14 @@
 
 (define *context* (list {}))
 
-(define (expand-macros ast)
+(define (walk-code ast)
   (console.log ast)
   ;; lets get to the thing!
-)
+  (let ((expr (car ast)))
+    (cond
+      ((create-context expr) (add-to-context expr))
+      ((is-macroexpand expr) (expand-macro expr))
+      (else expr))))
 
 (let ((read-file (get :readFile (require "fs"))))
   (read-file (get 3 process.argv)
@@ -14,4 +18,4 @@
              (lambda (err data)
               (if err
                 (console.log err)
-                (expand-macros (read data))))))
+                (walk-code (read data))))))

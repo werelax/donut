@@ -178,7 +178,7 @@ def_special_form('get', function(fname, args) {
 
 // Base flow operations
 
-def_special_form('if', function(fname, args) {
+def_special_form("if", function(fname, args) {
   var condition = args[0]
       if_block = args[1],
       else_block = args[2],
@@ -190,6 +190,26 @@ def_special_form('if', function(fname, args) {
                 compile(condition),
                 compile(if_block),
                 (else_block ? compile(else_block) : void 0));
+});
+
+def_special_form("cond", function(fname, args) {
+  var expr = args[0],
+      cond_rec = function(clauses) {
+        var clause = clauses[0],
+            condition = clause[0],
+            body = clause.slice(1);
+        console.log("CONDITION: ", condition)
+        if (condition == "else") {
+          return special_forms['progn'](fname, body);
+        } else {
+          return special_forms['if'](fname,
+                                     [ condition,
+                                       body,
+                                       cond_rec(clauses.slice(1)) ]);
+
+        }
+      };
+      return cond_rec(args);
 });
 
 // Base function operations
