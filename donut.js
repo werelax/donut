@@ -3,13 +3,15 @@ var compile = require('./compiler.js').compile;
 
 // node donut.js <file.dt>
 
+var decorate = require('js-beautify');
+
 require('fs').readFile(process.argv[2], 'utf-8', function(err, data) {
   if (err) throw err;
   var code = read(data).map(compile).join(";\n");
   console.log("== DONUT: \n");
   console.log(data);
   console.log("\n== JS: \n");
-  console.log(code);
+  console.log(decorate.js_beautify(code));
   console.log("\n== RUN: \n");
   eval(code);
 });
