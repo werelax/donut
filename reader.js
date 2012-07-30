@@ -92,6 +92,10 @@ def_prefix_reader_macro(":", function(stream) {
   return format("\"%s\"", stream.trim());
 });
 
+def_prefix_reader_macro(".", function(stream) {
+  return format("method-call %s ", stream.trim());
+});
+
 def_delimited_reader_macro("[", function(stream) {
   return format("(make-vector %s)", strip_delimiters(stream));
 });
@@ -164,8 +168,11 @@ function select_reader (stream) {
 /* Parsers */
 
 function to_js_name(string) {
-  return string.replace(/-/g, '_dash_')
-               .replace(/\*/g, '_star_');
+  return string
+          .replace(/-/g, '_dash_')
+          .replace(/\*/g, '_star_')
+          .replace(/\?/g, '_qmark')
+          ;
 }
 
 var parsers = {

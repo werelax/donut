@@ -67,6 +67,7 @@ declare_comparison('>');
 declare_comparison('=<');
 declare_comparison('=>');
 declare_comparison('=', '==');
+declare_comparison('eq_qmark', '==');
 declare_comparison('and', '&&');
 declare_comparison('or', '||');
 
@@ -105,6 +106,12 @@ def_special_form('list', function(fname, args) {
   return format("[%s]", args.join(", "));
 });
 
+def_special_form('cons', function(fname, args) {
+  var item = compile(args[0]),
+      list = compile(args[1]);
+  return format("(%s.concat([%s]))", list, item);
+});
+
 def_special_form('quote', function(fname, args) {
   var thing = args[0];
   function read_item (t) {
@@ -125,12 +132,6 @@ def_special_form('car', function(fname, args) {
 def_special_form('cdr', function(fname, args) {
   var list = compile(args[0]);
   return format("( %s.slice(1) )", list);
-});
-
-def_special_form('cons', function(fname, args) {
-  var thing = compile(args[0]),
-      list = compile(args[1]);
-  return format("[%s].concat(%s)", thing, list);
 });
 
 // Base assignment operations
@@ -176,6 +177,13 @@ def_special_form('get', function(fname, args) {
   return format("(%s[%s])", obj, index);
 });
 
+def_special_form('method_dash_call', function(fname, args) {
+  var method_name = compile(args[0]),
+      object = compile(args[1]),
+      params = args.slice(2).map(compile);
+  return format("(%s[\"%s\"](%s))", object, method_name, params.join(", "));
+});
+
 // Base flow operations
 
 def_special_form("if", function(fname, args) {
@@ -204,7 +212,7 @@ def_special_form("cond", function(fname, args) {
         } else {
           return special_forms['if'](fname,
                                      [ condition,
-                                       body,
+                                       ['progn'].concat(body),
                                        cond_rec(clauses.slice(1)) ]);
 
         }
