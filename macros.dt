@@ -1,13 +1,14 @@
-(define read (get :read (require "./reader.js"))
-        compile (get :compile (require "./compiler.js"))
-        format (get :format (require "util")))
+(define
+  read (get :read (require "./reader.js"))
+  compile (get :compile (require "./compiler.js"))
+  format (get :format (require "util")))
 
 ;; Inspect and modify scope
 
 (define (create-scope? expr)
- (case (car expr)
-  (("define" "let") true)
-  (else false)))
+  (case (car expr)
+    (("define" "let") true)
+    (else false)))
 
 (define (add-to-scope expr scope)
   (case (car expr)
@@ -49,13 +50,13 @@
   (console.log (format "AST: %j" ast))
   ;; lets get to the thing!
   (let ((expr (car ast)))
-   (if (not expr)
-     '()
-     (let ((next (cond
-                   ((create-scope? expr) (add-to-scope expr scope))
-                   ((is-macroexpand? expr) (expand-macro expr scope))
-                   (else expr))))
-       (cons next (walk-code (cdr ast) scope))))))
+    (if (not expr)
+      '()
+      (let ((next (cond
+                    ((create-scope? expr) (add-to-scope expr scope))
+                    ((is-macroexpand? expr) (expand-macro expr scope))
+                    (else expr))))
+        (cons next (walk-code (cdr ast) scope))))))
 
 ;; Just for testing (for now)
 
@@ -66,4 +67,4 @@
                (if err
                  (console.log err)
                  (console.log
-                 (format "\nRESULT: %j" (walk-code (read data))))))))
+                   (format "\nRESULT: %j" (walk-code (read data))))))))
