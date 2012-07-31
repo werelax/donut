@@ -1,7 +1,7 @@
 (define
-  read (get :read (require "./reader.js"))
+  read    (get :read    (require "./reader.js"))
   compile (get :compile (require "./compiler.js"))
-  format (get :format (require "util")))
+  format  (get :format  (require "util")))
 
 ;; Inspect and modify scope
 
