@@ -55,3 +55,7 @@
 (let ((a (+ 10 (* 100 (/ 1 2))))
       (b 0.2))
   (console.log "lexial sum => " (+ a b)))
+
+;; consing
+
+(console.log (cons 1 [2 3 4]))

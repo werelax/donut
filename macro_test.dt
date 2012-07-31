@@ -8,7 +8,12 @@
 
 (let ((c 1)
       (d (+ 4 5)))
+  (define akandemorl "hidden!")
   (console.log c d))
+
+(define z 0)
+
+;; Still doesn't know how to bind functions
 
 ;(define (jarl a)
 ;  (console.log a))

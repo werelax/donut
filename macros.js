@@ -2,41 +2,41 @@
         compile (get :compile (require "./compiler.js"))
         format (get :format (require "util")))
 
-(define *context* (list {}))
+;; Inspect and modify scope
 
-;; Inspect and modify context
-
-(define (create-context? expr)
+(define (create-scope? expr)
  (case (car expr)
-  (("define" "lambda" "let") true)
+  (("define" "let") true)
   (else false)))
 
-(define (add-to-context expr)
+(define (add-to-scope expr scope)
   (case (car expr)
-    ("define" (add-define-to-context expr))
-    ("let" (add-let-to-context expr))
-    ("lambda" (add-lambda-to-context expr)))
+    ("define" (add-define-to-scope expr scope))
+    ("let" (add-let-to-scope expr scope)))
   expr)
 
-(define (add-symbol-to-context symbol value)
- (let ((current-context (car *context*)))
-  (console.log "** ADDING" symbol "=" (compile value) "TO CONTEXT!")
-  (set! (get symbol current-context) value)))
+(define (add-symbol-to-scope symbol value scope)
+  (let ((current-scope (car scope)))
+    (console.log "** ADDING" symbol "=" (compile value) "TO SCOPE!")
+    (set! (get symbol current-scope) value)
+    (console.log (format "SCOPE SO FAR: %j" scope))))
 
-(define (add-define-to-context expr)
+(define (add-define-to-scope expr scope)
   (let ((symbol (cadr expr))
         (value (walk-code (.slice expr 2))))
-    (add-symbol-to-context symbol (car value))))
+    (add-symbol-to-scope symbol (car value) scope)))
 
-(define (add-let-to-context expr)
-  (let ((definitions (cadr expr)))
+(define (add-let-to-scope expr scope)
+  (let ((definitions (cadr expr))
+        (body (.slice expr 2))
+        ;; create new scope!
+        (new-scope (cons {} scope)))
     (map (lambda (pair)
            (let ((symbol (car pair))
                  (value (walk-code (cdr pair))))
-             (add-symbol-to-context symbol (car value))))
-         definitions)))
-
-(define (add-lambda-to-context expr))
+             (add-symbol-to-scope symbol (car value) new-scope)))
+         definitions)
+    (walk-code body new-scope)))
 
 ;; Macro expansion
 
@@ -45,17 +45,17 @@
 (define (expand-macro expr)
   (console.log "EXPANDING" expr "AS A MACRO!"))
 
-(define (walk-code ast)
+(define (walk-code ast (scope (list {})))
   (console.log (format "AST: %j" ast))
   ;; lets get to the thing!
   (let ((expr (car ast)))
    (if (not expr)
      '()
      (let ((next (cond
-                   ((create-context? expr) (add-to-context expr))
-                   ((is-macroexpand? expr) (expand-macro expr))
+                   ((create-scope? expr) (add-to-scope expr scope))
+                   ((is-macroexpand? expr) (expand-macro expr scope))
                    (else expr))))
-       (cons next (walk-code (cdr ast)))))))
+       (cons next (walk-code (cdr ast) scope))))))
 
 ;; Just for testing (for now)
 
@@ -63,9 +63,7 @@
   (read-file (get 3 process.argv)
              "utf-8"
              (lambda (err data)
-              (if err
-                (console.log err)
-                (console.log
-                (format "\nRESULT: %j \nCONTEXT: %j"
-                        (walk-code (read data))
-                        *context*))))))
+               (if err
+                 (console.log err)
+                 (console.log
+                 (format "\nRESULT: %j" (walk-code (read data))))))))

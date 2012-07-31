@@ -34,14 +34,15 @@ function def_special_form (name, body) {
   special_forms[name] = body;
 }
 
-function declare_operator (name) {
+function declare_operator (name, jsop) {
+  jsop || (jsop = name);
   def_special_form(name, function(fname, args) {
     var parenthesize = function(items) {
       var item = compile(items.pop());
       if (items.length == 0) {
         return item;
       } else {
-        return "(" + parenthesize(items) + " " + fname + " " + item + ")";
+        return "(" + parenthesize(items) + " " + jsop + " " + item + ")";
       }
     };
     return parenthesize(args);
@@ -64,11 +65,11 @@ function declare_prefix_op(name, op) {
 
 /* Special form definitions */
 
-declare_operator('+');
-declare_operator('-');
-declare_operator('*');
-declare_operator('/');
-declare_operator('%');
+declare_operator("+");
+declare_operator("_dash_", "-");
+declare_operator("_star_", "*");
+declare_operator("/");
+declare_operator("%");
 
 declare_comparison('<');
 declare_comparison('>');
@@ -122,7 +123,7 @@ def_special_form('list', function(fname, args) {
 def_special_form('cons', function(fname, args) {
   var item = compile(args[0]),
       list = compile(args[1]);
-  return format("(%s.concat([%s]))", list, item);
+  return format("([%s].concat(%s))", item, list);
 });
 
 def_special_form('quote', function(fname, args) {
