@@ -18,9 +18,7 @@
 
 (define (add-symbol-to-scope symbol value scope)
   (let ((current-scope (car scope)))
-    (console.log "** ADDING" symbol "=" (compile value) "TO SCOPE!")
-    (set! (get symbol current-scope) value)
-    (console.log (format "SCOPE SO FAR: %j" scope))))
+    (set! (get symbol current-scope) value)))
 
 (define (add-define-to-scope expr scope)
   (let ((symbol (cadr expr))
@@ -39,12 +37,34 @@
          definitions)
     (walk-code body new-scope)))
 
+;; Scope evaluation context
+
+(define (run-with-scope expr scope)
+  (let ((scope-closure (build-scope scope)))
+    (console.log (format scope-closure (compile expr)))))
+
+;; (function(a,b) { (function(b,c) { %s })(3,4)})(1,2)
+(define (build-scope scope)
+  (let ((bindings (last scope)))
+    (if bindings
+      (let ((keys (get-keys bindings)))
+        (let ((values (map (lambda (k) (compile (get k bindings)))
+                           keys)))
+          (format "(function(%s){ return %s })(%s)"
+                  (.join keys ", ")
+                  (build-scope (butlast scope))
+                  (.join values ", "))))
+      "%s")))
+
 ;; Macro expansion
 
-(define (is-macroexpand? expr) false)
+(define (is-macroexpand? expr)
+  (eq? (car expr) "defmacro"))
 
-(define (expand-macro expr)
-  (console.log "EXPANDING" expr "AS A MACRO!"))
+(define (expand-macro expr scope)
+  (console.log (format "EXPANDING %j AS A MACRO!" expr))
+  (console.log (format " ** SCOPE: %j" scope))
+  (console.log "\n\n" (run-with-scope "YEAH!" scope) "\n\n"))
 
 (define (walk-code ast (scope (list {})))
   (console.log (format "AST: %j" ast))

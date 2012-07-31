@@ -1,17 +1,12 @@
-(define a 1)
+(define some (+ 5 5))
 
-(define b (+ a 1))
+(let ((more (* some 10)))
+  (defmacro jarl (x)
+    (cons 'quote (list 1 2 x))))
 
-(lambda (a)
-  (let ((a 1))
-    (+ a a a)))
+(defmacro jorl (y)
+  (cons 'quote (list 7 8 y)))
 
-(let ((c 1)
-      (d (+ 4 5)))
-  (define akandemorl "hidden!")
-  (console.log c d))
-
-(define z 0)
 
 ;; Still doesn't know how to bind functions
 

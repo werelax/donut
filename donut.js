@@ -5,15 +5,28 @@ var compile = require('./compiler.js').compile;
 
 var decorate = require('js-beautify');
 
-require('fs').readFile(process.argv[2], 'utf-8', function(err, data) {
+var read_file = require('fs').readFile;
+
+read_file(process.argv[2], 'utf-8', function(err, data) {
   if (err) throw err;
-  var code = read(data).map(compile).join(";\n");
-  console.log("== DONUT: \n");
-  console.log(data);
-  console.log("\n== JS: \n");
-  console.log(decorate.js_beautify(code));
-  console.log("\n== RUN: \n");
-  eval(code);
+    var code = read(data).map(compile).join(";\n");
+
+  read_file('./lib/prelude.dt', 'utf-8', function(err, data) {
+    if (err) throw err;
+      var prelude = read(data).map(compile).join(";\n");
+
+    read_file('./lib/prelude.js', 'utf-8', function(err, data) {
+      if (err) throw err;
+        var js_prelude = data;
+
+      console.log("== DONUT: \n");
+      console.log(data);
+      console.log("\n== JS: \n");
+      console.log(decorate.js_beautify(code));
+      console.log("\n== RUN: \n");
+      eval(js_prelude + prelude + code);
+    });
+  });
 });
 
 
