@@ -20,11 +20,16 @@
   (let ((current-scope (car scope)))
     (set! (get symbol current-scope) value)))
 
+(define (add-lambda-to-scope symbol params body scope)
+  (let ((fn (.concat '("lambda" params) body)))
+    (add-symbol-to-scope symbol fn scope)))
+
 (define (add-define-to-scope expr scope)
-  ;; TODO: Check if is a lambda!
   (let ((symbol (cadr expr))
-        (value (car (walk-code (.slice expr 2)))))
-    (add-symbol-to-scope symbol value scope)
+        (value (walk-code (.slice expr 2))))
+    (if (pair? symbol)
+      (add-lambda-to-scope (car symbol) (cdr symbol) value scope)
+      (add-symbol-to-scope symbol (car value) scope))
     expr))
 
 (define (add-let-to-scope expr scope)
