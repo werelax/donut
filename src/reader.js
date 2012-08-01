@@ -96,6 +96,10 @@ def_prefix_reader_macro(",", function(stream) {
   return format("(unquote %s)", stream);
 });
 
+def_prefix_reader_macro(",@", function(stream) {
+  return format("(unquote-splice %s)", stream);
+});
+
 def_prefix_reader_macro(":", function(stream) {
   return format("\"%s\"", stream.trim());
 });

@@ -362,14 +362,14 @@ def_special_form("quote", function(fname, args) {
 
 function qquote_rec (tree, acc) {
   acc || (acc = []);
-  console.log("TREE: ", tree, ", ACC: ", acc)
   if (!(tree instanceof Array)) {
     return acc.concat(format("\"%s\"", tree));
   } else if (tree.length == 0) {
     return [acc];
   } else if (tree[0] == "unquote") {
-    console.log("UNQUOTING: ", tree, ", ", tree.slice(1));
     return acc.concat(tree.slice(1));
+  } else if (tree[0] == "unquote_dash_splice") {
+    return acc.concat(tree[1]);
   } else {
     head = tree[0];
     tail = tree.slice(1);
@@ -389,7 +389,6 @@ function arr_to_str (arr) {
 def_special_form("quasiquote", function(fname, args) {
   var thing = args[0],
       result = qquote_rec(thing, [])[0];
-  console.log("RESULT: ", result);
   return arr_to_str(result);
 });
 
