@@ -126,18 +126,6 @@ def_special_form("list", function(fname, args) {
   return format("[%s]", args.join(", "));
 });
 
-def_special_form("quote", function(fname, args) {
-  var thing = args[0];
-  function read_item (t) {
-    if (_.isArray(t)) {
-      return format("[%s]", t.map(read_item).join(", "));
-    } else {
-      return t;
-    }
-  };
-  return read_item(thing);
-});
-
 def_special_form("car", function(fname, args) {
   var list = compile(args[0]);
   return format("( %s[0] )", list);
@@ -349,6 +337,44 @@ def_special_form("let", function(fname, args) {
                 last,
                 values.join(", "));
 });
+
+/* Syntax operators */
+
+def_special_form("quote", function(fname, args) {
+  var thing = args[0];
+  function read_item (t) {
+    if (_.isArray(t)) {
+      return format("[%s]", t.map(read_item).join(", "));
+    } else {
+      return t;
+    }
+  };
+  return read_item(thing);
+});
+
+def_special_form("quasiquote", function(fname, args) {
+  var thing = args[0],
+      qquote_rec = function(tree, acc) {
+        var head, tail, value;
+        if (tree.length == 0) {
+          return acc;
+        } else {
+          head = tree[0];
+          tail = tree.slice(1);
+          if (!(head instanceof Array)) {
+            return qquote_rec(tail, acc.concat(head));
+          } else if (head[0] == "unquote") {
+            return qquote_rec(tail,
+                              acc.concat( compile(head[1])));
+          } else {
+            return qquote_rec(tail,
+                              acc.concat( qquote_rec(head, [])));
+          }
+        }
+      };
+  return format("%j", qquote_rec(thing, []));
+});
+
 
 /* Exports */
 
