@@ -15,6 +15,7 @@ function gensym () {
 var special_forms = {};
 
 function compile(ast) {
+  if (!ast) { return ''; }
   var fname, fargs, transformation, js_code;
   if (_.isArray(ast)) {
     fname = compile(ast[0]);
@@ -120,12 +121,12 @@ def_special_form("defmacro", function(fname, args) {
 
 // Basic "LIST" operations
 
-def_special_form('list', function(fname, args) {
+def_special_form("list", function(fname, args) {
   var args = args.map(compile);
   return format("[%s]", args.join(", "));
 });
 
-def_special_form('quote', function(fname, args) {
+def_special_form("quote", function(fname, args) {
   var thing = args[0];
   function read_item (t) {
     if (_.isArray(t)) {
@@ -137,41 +138,41 @@ def_special_form('quote', function(fname, args) {
   return read_item(thing);
 });
 
-def_special_form('car', function(fname, args) {
+def_special_form("car", function(fname, args) {
   var list = compile(args[0]);
   return format("( %s[0] )", list);
 });
 
-def_special_form('cdr', function(fname, args) {
+def_special_form("cdr", function(fname, args) {
   var list = compile(args[0]);
   return format("( %s.slice(1) )", list);
 });
 
-def_special_form('nth', function(fname, args) {
+def_special_form("nth", function(fname, args) {
   var index = compile(args[0]),
       list = compile(args[1]);
   return format("(%s[%s])", list, index);
 });
 
-def_special_form('cadr', function(fname, args) {
-  return special_forms['nth'](fname, [1].concat(args));
+def_special_form("cadr", function(fname, args) {
+  return special_forms["nth"](fname, [1].concat(args));
 });
 
-def_special_form('caddr', function(fname, args) {
-  return special_forms['nth'](fname, [2].concat(args));
+def_special_form("caddr", function(fname, args) {
+  return special_forms["nth"](fname, [2].concat(args));
 });
 
-def_special_form('cddr', function(fname, args) {
+def_special_form("cddr", function(fname, args) {
   var list = compile(args[0]);
   return format("(%s.slice(2))", list);
 });
 
-def_special_form('cdddr', function(fname, args) {
+def_special_form("cdddr", function(fname, args) {
   var list = compile(args[0]);
   return format("(%s.slice(3))", list);
 });
 
-def_special_form('map', function(fname, args) {
+def_special_form("map", function(fname, args) {
   var fn = compile(args[0]),
       list = compile(args[1]);
   return format("((%s).map(%s))", list, fn);
@@ -188,7 +189,7 @@ function in_groups_of(list, n) {
   return result;
 }
 
-def_special_form('define', function(fname, args) {
+def_special_form("define", function(fname, args) {
   if (_.isArray(args[0])) return special_forms['define_dash_lambda'](fname, args);
   var pairs = in_groups_of(args, 2),
       expansion = function (p) {
@@ -200,17 +201,17 @@ def_special_form('define', function(fname, args) {
   return definitions.concat('').join('; ');
 });
 
-def_special_form('define_dash_lambda', function(fname, args) {
+def_special_form("define_dash_lambda", function(fname, args) {
   var lambda_expr = args[0],
       lambda_name = lambda_expr[0],
       lambda_params = lambda_expr.slice(1),
       body = args.slice(1);
   return format("var %s = %s",
                 lambda_name,
-                special_forms['lambda'](fname, [lambda_params].concat(body)));
+                special_forms["lambda"](fname, [lambda_params].concat(body)));
 });
 
-def_special_form('set!', function(fname, args) {
+def_special_form("set!", function(fname, args) {
   var symbol = compile(args[0]),
       value = compile(args[1]);
   return format("(%s = %s)", symbol, value);
@@ -218,13 +219,13 @@ def_special_form('set!', function(fname, args) {
 
 // Hash/Object operations
 
-def_special_form('get', function(fname, args) {
+def_special_form("get", function(fname, args) {
   var index = compile(args[0]),
       obj = compile(args[1]);
   return format("(%s[%s])", obj, index);
 });
 
-def_special_form('method_dash_call', function(fname, args) {
+def_special_form("method_dash_call", function(fname, args) {
   var method_name = compile(args[0]),
       object = compile(args[1]),
       params = args.slice(2).map(compile);
@@ -251,11 +252,11 @@ def_special_form("cond", function(fname, args) {
             condition = clause[0],
             body = clause.slice(1);
         if (condition == "else") {
-          return special_forms['progn'](fname, body);
+          return special_forms["progn"](fname, body);
         } else {
-          return special_forms['if'](fname,
+          return special_forms["if"](fname,
                                      [ condition,
-                                       ['progn'].concat(body),
+                                       ["progn"].concat(body),
                                        cond_rec(clauses.slice(1)) ]);
 
         }
@@ -268,7 +269,7 @@ def_special_form("case", function(fname, args) {
     // the [].concat(..) trick makes sure it ends as an array
     var value_list = ([].concat(clause[0])).map(compile),
         value_code = value_list.map(function(v) {
-          if (v == 'else') {
+          if (v == "else") {
             return "default:";
           } else {
             return format("case %s:\n", v);
@@ -310,7 +311,7 @@ function params_helpers(params) {
   return [params, helper_code];
 }
 
-def_special_form('lambda', function(fname, args) {
+def_special_form("lambda", function(fname, args) {
   var parsed_params = params_helpers(args[0]),
       params = parsed_params[0].map(compile),
       params_helper_code = parsed_params[1],
@@ -318,14 +319,14 @@ def_special_form('lambda', function(fname, args) {
       last = body.pop();
   // just to make .join() add an ending ;
   body.push('');
-  return format("(function(%s) {\n %s \n %s return %s;\n })",
+  return format("(function(%s) { %s  %s return %s; })",
                 params,
                 params_helper_code,
                 body.join(";\n"),
                 last);
 });
 
-def_special_form('progn', function(fname, args) {
+def_special_form("progn", function(fname, args) {
   return format("( %s )", args.map(compile).join(', '));
 });
 

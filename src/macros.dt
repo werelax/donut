@@ -1,8 +1,13 @@
 (define
-  read    (get :read    (require "./reader.js"))
-  compile (get :compile (require "./compiler.js"))
-  gensym  (get :gensym  (require "./compiler.js"))
-  format  (get :format  (require "util")))
+  read      (get :read    (require "./reader.js"))
+  compile   (get :compile (require "./compiler.js"))
+  gensym    (get :gensym  (require "./compiler.js"))
+  format    (get :format  (require "util"))
+  read-file (get :readFileSync (require "fs")))
+
+;; Load the JS prelude
+
+(eval (read-file "./lib/prelude.js" "utf-8"))
 
 ;; Inspect and modify scope
 
@@ -38,7 +43,6 @@
         (body (.slice expr 2))
         ;; create new scope!
         (new-scope (cons {} scope)))
-    (console.log (format "LET BODY: %j" body))
     (map (lambda (pair)
            (let ((symbol (car pair))
                  (value (car (walk-code (cdr pair)))))
@@ -78,10 +82,6 @@
           (body (walk-code (cddr expr) scope)))
       (let ((macro-function
               (compile (.concat '("lambda" args) body))))
-        ;; XXX: DEBUG
-        (console.log "\n\n==EXPANDED: " name "\n"
-                     (run-with-scope name macro-function scope)
-                     "\n==\n")
         ;; store the compiled-evaled macro-func in the global macro dictionary
         (set! (get name *macros*) (eval (run-with-scope name macro-function scope))))
       expr)))
@@ -103,14 +103,9 @@
         (let ((expanded-ast (car (walk-code
                                    (list expansion)
                                    scope))))
-          (console.log "TRYING TO EXPAND: " name)
-          (console.log (format "PARAMS: %j" params))
-          (console.log "RESULT: " expansion)
-          (console.log "RESULT AST: " expanded-ast)
           expanded-ast)))))
 
 (define (walk-code ast (scope (list {})))
-  (console.log (format " -> AST: %j" ast))
   ;; lets get to the thing!
   (if (null? ast)
     nil
@@ -123,20 +118,11 @@
                                         (walk-code (cdr expr) scope)))
                     (else expr)))
             (rest (walk-code (cdr ast) scope)))
-        (console.log "XPR: " expr)
-        (console.log "NEXT: " next "\n ")
         (cons next rest)))))
 
-;; Just for testing (for now)
+(define (macroexpand ast)
+  (if ast (walk-code ast) []))
 
-(let ((read-file (get :readFile (require "fs"))))
-  (read-file (get 3 process.argv)
-             "utf-8"
-             (lambda (err data)
-               (if err
-                 (console.log err)
-                 (let ((new-ast (walk-code (read data))))
-                   (console.log "\n\n OLD AST: \n" (read data))
-                   (console.log "\n New AST: \n" new-ast)
-                   (console.log "\n\n ====== \n\n")
-                   (console.log (compile new-ast)))))))
+;; Exports just macroexpand
+
+(set! (get "macroexpand" exports) macroexpand)

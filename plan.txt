@@ -1,5 +1,2 @@
-* 1. Decent reader
-* 1b. Decent AST
-* 2. Symbol/var assignment
-3. Macro system
-
+- Proper quote
+- Quasiquote/unquote and (gasp) unquote-splice

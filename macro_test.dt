@@ -11,7 +11,7 @@
   (let ((val (if (> y 0)
                y
                (jorl 1))))
-    (list 7 8 val)))
+    (list "quote" (list 7 8 val))))
 
 (defmacro (fortytwo)
   42)
