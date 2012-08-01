@@ -340,39 +340,57 @@ def_special_form("let", function(fname, args) {
 
 /* Syntax operators */
 
+
+function quote_rec (tree, acc) {
+  acc || (acc = []);
+  if (!(tree instanceof Array)) {
+    return acc.concat(tree);
+  } else if (tree.length == 0) {
+    return [acc];
+  } else {
+    head = tree[0];
+    tail = tree.slice(1);
+    return quote_rec(tail,
+                     acc.concat( quote_rec(head, [])));
+  }
+};
+
 def_special_form("quote", function(fname, args) {
   var thing = args[0];
-  function read_item (t) {
-    if (_.isArray(t)) {
-      return format("[%s]", t.map(read_item).join(", "));
-    } else {
-      return t;
-    }
-  };
-  return read_item(thing);
+  return format("%j", quote_rec(thing, [])[0]);
 });
+
+function qquote_rec (tree, acc) {
+  acc || (acc = []);
+  console.log("TREE: ", tree, ", ACC: ", acc)
+  if (!(tree instanceof Array)) {
+    return acc.concat(format("\"%s\"", tree));
+  } else if (tree.length == 0) {
+    return [acc];
+  } else if (tree[0] == "unquote") {
+    console.log("UNQUOTING: ", tree, ", ", tree.slice(1));
+    return acc.concat(tree.slice(1));
+  } else {
+    head = tree[0];
+    tail = tree.slice(1);
+    return qquote_rec(tail,
+                     acc.concat( qquote_rec(head, [])));
+  }
+}
+
+function arr_to_str (arr) {
+  if (arr instanceof Array) {
+    return format("[ %s ]", arr.map(arr_to_str).join(', '));
+  } else {
+    return arr;
+  }
+}
 
 def_special_form("quasiquote", function(fname, args) {
   var thing = args[0],
-      qquote_rec = function(tree, acc) {
-        var head, tail, value;
-        if (tree.length == 0) {
-          return acc;
-        } else {
-          head = tree[0];
-          tail = tree.slice(1);
-          if (!(head instanceof Array)) {
-            return qquote_rec(tail, acc.concat(head));
-          } else if (head[0] == "unquote") {
-            return qquote_rec(tail,
-                              acc.concat( compile(head[1])));
-          } else {
-            return qquote_rec(tail,
-                              acc.concat( qquote_rec(head, [])));
-          }
-        }
-      };
-  return format("%j", qquote_rec(thing, []));
+      result = qquote_rec(thing, [])[0];
+  console.log("RESULT: ", result);
+  return arr_to_str(result);
 });
 
 

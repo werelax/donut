@@ -110,9 +110,7 @@ var walk_dash_code = (function(ast, scope) {
     })((ast[0]))));
 });
 var macroexpand = (function(ast) {
-    console.log(format("AST: %j", ast));
     var expanded = ast ? (walk_dash_code(ast)) : null;
-    console.log(format("EXPANDED: %j", expanded));
     return ast ? expanded : ([]);
 });
 ((exports["macroexpand"]) = macroexpand);

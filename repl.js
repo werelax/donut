@@ -3,6 +3,7 @@ var compile = require('./src/compiler.js').compile;
 var macroexpand = require('./src/macros.js').macroexpand;
 var read_file = require('fs').readFile;
 var readline = require('readline');
+var decorate = require('js-beautify').js_beautify;
 var format = require('util').format;
 
 var rl = readline.createInterface({
@@ -27,8 +28,16 @@ read_file("./lib/prelude.js", 'utf-8', function(err, data) {
 
       var repl = function() {
         rl.question('DONUT> ', function(ans) {
-          try {
-            var result = eval(macroexpand(read(ans)).map(compile).concat('').join(";\n"));
+          var result, ast, final_ast, compiled;
+          if (ans.trim()) try {
+            ast = read(ans);
+            final_ast = macroexpand(ast);
+            compiled = final_ast.map(compile).concat('').join(";\n");
+            result = eval(compiled);
+            console.log(format("  * AST: %j", ast));
+            console.log(format("  * EXPANDED: %j", final_ast));
+            console.log(format("  * JS: %s", decorate(compiled)));
+            console.log("\n");
             console.log(format("-> %j", result));
           } catch (e) {
             console.log(e);
