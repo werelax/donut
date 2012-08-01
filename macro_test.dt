@@ -1,23 +1,28 @@
-;; (define some (+ 5 5))
-;; 
-;; (let ((more (* some 10)))
-;;   (defmacro jarl (x)
-;;     (cons "quote" (list 1 2 (* more x)))))
-;; 
-;; (defmacro jorl (y)
-;;   (let ((val (if (> y 0)
-;;                y
-;;                (jorl 1))))
-;;     (list 7 8 val)))
-;; 
+(define some (+ 5 5))
+
+(let ((more (* some 10)))
+  (defmacro jarl (x)
+    (list "quote" (list 1 2 (* more x)))))
+
+(defmacro jarl-control (x)
+    (list "quote" (list 1 2 (* some x))))
+
+(defmacro jorl (y)
+  (let ((val (if (> y 0)
+               y
+               (jorl 1))))
+    (list 7 8 val)))
+
 ;; (defmacro fortytwo ()
 ;;   42)
-
-
-;; (jorl 0)
 ;; 
-;; (jarl 10)
 ;; 
+(jorl 0)
+
+(jarl-control 10)
+
+(jarl 10)
+
 ;; (fortytwo)
 ;; 
 ;; (console.log (fortytwo))

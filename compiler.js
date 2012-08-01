@@ -113,17 +113,16 @@ def_special_form("str", function(fname, args) {
   return format("\"%s\"", result);
 })
 
+def_special_form("defmacro", function(fname, args) {
+  // macros doesn't get compiled
+  return "/* macro " + args[0] + " was here */ true";
+});
+
 // Basic "LIST" operations
 
 def_special_form('list', function(fname, args) {
   var args = args.map(compile);
   return format("[%s]", args.join(", "));
-});
-
-def_special_form('cons', function(fname, args) {
-  var item = compile(args[0]),
-      list = compile(args[1]);
-  return format("([%s].concat(%s))", item, list);
 });
 
 def_special_form('quote', function(fname, args) {
@@ -332,7 +331,7 @@ def_special_form('progn', function(fname, args) {
 
 /* Environment operations */
 
-def_special_form('let', function(fname, args) {
+def_special_form("let", function(fname, args) {
   var bindings = args[0],
       names = [],
       values = [],
