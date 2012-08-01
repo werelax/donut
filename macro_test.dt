@@ -1,19 +1,19 @@
 (define some (+ 5 5))
 
 (let ((more (* some 10)))
-  (defmacro jarl (x)
+  (defmacro (jarl x)
     (list "quote" (list 1 2 (* more x)))))
 
-(defmacro jarl-control (x)
+(defmacro (jarl-control x)
     (list "quote" (list 1 2 (* some x))))
 
-(defmacro jorl (y)
+(defmacro (jorl y)
   (let ((val (if (> y 0)
                y
                (jorl 1))))
     (list 7 8 val)))
 
-(defmacro fortytwo ()
+(defmacro (fortytwo)
   42)
 
 
@@ -34,7 +34,7 @@
 (define (fun a)
   (list "console.log" a))
 
-(defmacro mac-fun (a)
+(defmacro (mac-fun a)
   (fun a))
 
 (mac-fun "ayayay")

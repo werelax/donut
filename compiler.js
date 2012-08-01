@@ -115,7 +115,7 @@ def_special_form("str", function(fname, args) {
 
 def_special_form("defmacro", function(fname, args) {
   // macros doesn't get compiled
-  return "/* macro " + args[0] + " was here */ true";
+  return "/* macro " + args[0][0] + " omited */ true";
 });
 
 // Basic "LIST" operations
