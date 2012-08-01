@@ -1,19 +1,28 @@
-(define some (+ 5 5))
+;; (define some (+ 5 5))
+;; 
+;; (let ((more (* some 10)))
+;;   (defmacro jarl (x)
+;;     (cons "quote" (list 1 2 (* more x)))))
+;; 
+;; (defmacro jorl (y)
+;;   (let ((val (if (> y 0)
+;;                y
+;;                (jorl 1))))
+;;     (list 7 8 val)))
+;; 
+;; (defmacro fortytwo ()
+;;   42)
 
-(let ((more (* some 10)))
-  (defmacro jarl (x)
-    (cons "quote" (list 1 2 (* some x)))))
 
-(defmacro jorl (y)
-  (if (> y 0)
-    (cons "quote" (list 7 8 y (jorl (- 0 1))))
-    1))
+;; (jorl 0)
+;; 
+;; (jarl 10)
+;; 
+;; (fortytwo)
+;; 
+;; (console.log (fortytwo))
 
-
-(jorl 1)
-
-(jarl 10)
-
+(console.log 32)
 
 ;; Still doesn't know how to bind functions
 

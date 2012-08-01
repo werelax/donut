@@ -14,8 +14,7 @@
 (define (add-to-scope expr scope)
   (case (car expr)
     ("define" (add-define-to-scope expr scope))
-    ("let" (add-let-to-scope expr scope)))
-  expr)
+    ("let" (add-let-to-scope expr scope))))
 
 (define (add-symbol-to-scope symbol value scope)
   (let ((current-scope (car scope)))
@@ -25,19 +24,22 @@
   ;; TODO: Check if is a lambda!
   (let ((symbol (cadr expr))
         (value (walk-code (.slice expr 2))))
-    (add-symbol-to-scope symbol (car value) scope)))
+    (add-symbol-to-scope symbol value scope)
+    expr))
 
 (define (add-let-to-scope expr scope)
-  (let ((definitions (cadr expr))
+  (let ((header (.slice expr 0 2))
+        (definitions (cadr expr))
         (body (.slice expr 2))
         ;; create new scope!
         (new-scope (cons {} scope)))
+    (console.log (format "LET BODY: %j" body))
     (map (lambda (pair)
            (let ((symbol (car pair))
                  (value (walk-code (cdr pair))))
-             (add-symbol-to-scope symbol (car value) new-scope)))
+             (add-symbol-to-scope symbol value new-scope)))
          definitions)
-    (walk-code body new-scope)))
+    (cons header (walk-code body new-scope))))
 
 ;; Scope evaluation context
 
@@ -46,7 +48,6 @@
     (format scope-closure name (compile expr))))
 
 (define (build-scope scope)
-  (console.log "build-scope: " scope)
   (let ((bindings (last scope)))
     (if bindings
       (let ((keys (get-keys bindings)))
@@ -68,7 +69,7 @@
 (define (create-macro expr scope)
   (let ((name (cadr expr))
         (args (caddr expr))
-        (body (walk-code (cdddr expr) scope)))
+        (body (walk-code (list (cdddr expr)) scope)))
     (let ((macro-function
            (compile (.concat '("lambda" args) body))))
       ;; XXX: DEBUG
@@ -99,20 +100,23 @@
         (walk-code (list expansion) scope)))))
 
 (define (walk-code ast (scope (list {})))
-  (console.log (format "AST: %j" ast))
+  (console.log (format " -> AST: %j" ast))
   ;; lets get to the thing!
-  (let ((expr (car ast)))
-    (if (not expr)
-      nil
+  (if (and (pair? ast) (not (null? ast)))
+    (let ((expr (car ast)))
+      (console.log "XPR: " expr)
       (let ((next (cond
                     ((create-scope? expr) (add-to-scope expr scope))
                     ((is-macro-definition? expr) (create-macro expr scope))
                     ((is-macro-expansion? expr) (expand-macro expr scope))
+                    ((pair? expr) (cons (car expr)
+                                        (walk-code (cdr expr) scope)))
                     (else expr)))
             (rest (walk-code (cdr ast) scope)))
-        (if (car next)
-          (cons next rest)
-          rest)))))
+        (if (null? rest)
+          next
+          (cons next rest))))
+    ast))
 
 ;; Just for testing (for now)
 
@@ -122,4 +126,7 @@
              (lambda (err data)
                (if err
                  (console.log err)
-                 (console.log "\nRESULT:\n"(walk-code (read data)))))))
+                 (let ((new-ast (walk-code (read data))))
+                   (console.log "\n New AST: \n" new-ast)
+                   (console.log "\n\n ====== \n\n")
+                   (console.log (compile new-ast)))))))

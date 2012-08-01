@@ -235,22 +235,19 @@ def_special_form('method_dash_call', function(fname, args) {
 // Base flow operations
 
 def_special_form("if", function(fname, args) {
-  var condition = args[0]
-      if_block = args[1],
-      else_block = args[2],
-      expanded = "";
+  var condition = compile(args[0]),
+      if_block = compile(args[1]),
+      else_block = args[2] ? compile(args[2]) : void 0;
   // This little trick works for now. But it would
   // be better to implement this properly.
   // The problem was: "if" should be expressions, not statements
-  return format("((%s) ? (%s) : (%s))",
-                compile(condition),
-                compile(if_block),
-                (else_block ? compile(else_block) : void 0));
+  return format("((%s) ? (%s) : (%s))", condition, if_block, else_block);
 });
 
 def_special_form("cond", function(fname, args) {
   var expr = args[0],
       cond_rec = function(clauses) {
+        if (!clauses[0]) { return void 0; }
         var clause = clauses[0],
             condition = clause[0],
             body = clause.slice(1);
@@ -286,7 +283,7 @@ def_special_form("case", function(fname, args) {
   var test = compile(args[0]),
       clauses = args.slice(1),
       symb = gensym();
-  return format("(function(%s) { switch(%s) { %s }})(%s);",
+  return format("(function(%s) { switch(%s) { %s }})(%s)",
                 symb,
                 symb,
                 clauses.map(expand_clause).join(''),

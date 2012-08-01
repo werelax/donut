@@ -9,6 +9,7 @@ var read_file = require('fs').readFile;
 
 read_file(process.argv[2], 'utf-8', function(err, data) {
   if (err) throw err;
+    var donut_code = data;
     var code = read(data).map(compile).join(";\n");
 
   read_file('./lib/prelude.dt', 'utf-8', function(err, data) {
@@ -20,7 +21,7 @@ read_file(process.argv[2], 'utf-8', function(err, data) {
         var js_prelude = data;
 
       console.log("== DONUT: \n");
-      console.log(data);
+      console.log(donut_code);
       console.log("\n== JS: \n");
       console.log(decorate.js_beautify(code));
       console.log("\n== RUN: \n");
