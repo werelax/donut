@@ -1,6 +1,7 @@
 (define
   read    (get :read    (require "./reader.js"))
   compile (get :compile (require "./compiler.js"))
+  gensym  (get :gensym  (require "./compiler.js"))
   format  (get :format  (require "util")))
 
 ;; Inspect and modify scope
@@ -21,6 +22,7 @@
     (set! (get symbol current-scope) value)))
 
 (define (add-define-to-scope expr scope)
+  ;; TODO: Check if is a lambda!
   (let ((symbol (cadr expr))
         (value (walk-code (.slice expr 2))))
     (add-symbol-to-scope symbol (car value) scope)))
@@ -39,44 +41,78 @@
 
 ;; Scope evaluation context
 
-(define (run-with-scope expr scope)
+(define (run-with-scope name expr scope)
   (let ((scope-closure (build-scope scope)))
-    (console.log (format scope-closure (compile expr)))))
+    (format scope-closure name (compile expr))))
 
-;; (function(a,b) { (function(b,c) { %s })(3,4)})(1,2)
 (define (build-scope scope)
+  (console.log "build-scope: " scope)
   (let ((bindings (last scope)))
     (if bindings
       (let ((keys (get-keys bindings)))
         (let ((values (map (lambda (k) (compile (get k bindings)))
                            keys)))
-          (format "(function(%s){ return %s })(%s)"
+          (format "(function(%s){ return %s; })(%s)"
                   (.join keys ", ")
                   (build-scope (butlast scope))
                   (.join values ", "))))
-      "%s")))
+      "(%s = %s)")))
+
+;; Macro definition
+
+(define *macros* {})
+
+(define (is-macro-definition? expr)
+  (eq? (car expr) "defmacro"))
+
+(define (create-macro expr scope)
+  (let ((name (cadr expr))
+        (args (caddr expr))
+        (body (walk-code (cdddr expr) scope)))
+    (let ((macro-function
+           (compile (.concat '("lambda" args) body))))
+      ;; XXX: DEBUG
+      (console.log "\n\n==EXPANDED: " name "\n"
+                   (run-with-scope name macro-function scope)
+                   "\n==\n")
+      ;; store the compiled-evaled macro-func in the global macro dictionary
+      (set! (get name *macros*) (eval (run-with-scope name macro-function scope))))
+    nil))
 
 ;; Macro expansion
 
-(define (is-macroexpand? expr)
-  (eq? (car expr) "defmacro"))
+(define (is-macro-expansion? expr)
+  (some (lambda (macro)
+          (eq? macro (car expr)))
+        (get-keys *macros*)))
 
 (define (expand-macro expr scope)
-  (console.log (format "EXPANDING %j AS A MACRO!" expr))
-  (console.log (format " ** SCOPE: %j" scope))
-  (console.log "\n\n" (run-with-scope "YEAH!" scope) "\n\n"))
+  (let ((name (car expr))
+        (params (map eval ;; not sure about this EVAL!
+                     (map compile
+                          (cdr expr)))))
+    (let ((macro (get name *macros*)))
+      (let ((expansion (.apply macro {} params)))
+        (console.log "TRYING TO EXPAND: " name)
+        (console.log (format "PARAMS: %j" params))
+        (console.log "RESULT: " expansion)
+        (walk-code (list expansion) scope)))))
 
 (define (walk-code ast (scope (list {})))
   (console.log (format "AST: %j" ast))
   ;; lets get to the thing!
   (let ((expr (car ast)))
     (if (not expr)
-      '()
+      nil
       (let ((next (cond
                     ((create-scope? expr) (add-to-scope expr scope))
-                    ((is-macroexpand? expr) (expand-macro expr scope))
-                    (else expr))))
-        (cons next (walk-code (cdr ast) scope))))))
+                    ((is-macro-definition? expr) (create-macro expr scope))
+                    ((is-macro-expansion? expr) (expand-macro expr scope))
+                    (else expr)))
+            (rest (walk-code (cdr ast) scope)))
+        (if (car next)
+          (cons next rest)
+          rest)))))
 
 ;; Just for testing (for now)
 
@@ -86,5 +122,4 @@
              (lambda (err data)
                (if err
                  (console.log err)
-                 (console.log
-                   (format "\nRESULT: %j" (walk-code (read data))))))))
+                 (console.log "\nRESULT:\n"(walk-code (read data)))))))

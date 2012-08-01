@@ -162,6 +162,16 @@ def_special_form('caddr', function(fname, args) {
   return special_forms['nth'](fname, [2].concat(args));
 });
 
+def_special_form('cddr', function(fname, args) {
+  var list = compile(args[0]);
+  return format("(%s.slice(2))", list);
+});
+
+def_special_form('cdddr', function(fname, args) {
+  var list = compile(args[0]);
+  return format("(%s.slice(3))", list);
+});
+
 def_special_form('map', function(fname, args) {
   var fn = compile(args[0]),
       list = compile(args[1]);
@@ -182,9 +192,13 @@ function in_groups_of(list, n) {
 def_special_form('define', function(fname, args) {
   if (_.isArray(args[0])) return special_forms['define_dash_lambda'](fname, args);
   var pairs = in_groups_of(args, 2),
-      expansion = function (p) { return format("var %s = %s", compile(p[0]), p[1]? compile(p[1]):"undefined"); }
+      expansion = function (p) {
+        return format("var %s = %s",
+                      compile(p[0]),
+                      p[1] ? compile(p[1]) : "undefined");
+      }
       definitions = pairs.map(expansion);
-  return definitions.join('; ');
+  return definitions.concat('').join('; ');
 });
 
 def_special_form('define_dash_lambda', function(fname, args) {
@@ -342,3 +356,4 @@ def_special_form('let', function(fname, args) {
 /* Exports */
 
 exports['compile'] = compile;
+exports['gensym'] = gensym;

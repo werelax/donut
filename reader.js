@@ -205,7 +205,9 @@ function read_token (code) {
 }
 
 function strip_comments(code) {
-  return code.replace(/;.*\n/g, '');
+  return code.replace(/;;.*\n/g, '')
+             .replace(/\n+/g, ' ')
+             .trim();
 }
 
 /* Main READ entry point */

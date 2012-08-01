@@ -10,3 +10,8 @@
   - Pero cómo vas a poder modificar syntaxis si el programa ya está compilado??
   - Esto son rollos meta-circulares del interprete-compiler de LISP...
   * Por ahora lo dejo fuera!
+
+* -1 se traduce por _dash_1
+
+* con (define (some a b c))
+  - Si los parámetros NO son pares, se incrusta igualmente a || (a = undefined)
