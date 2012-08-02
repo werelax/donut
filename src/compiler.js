@@ -362,14 +362,17 @@ def_special_form("quote", function(fname, args) {
 
 function qquote_rec (tree, acc) {
   acc || (acc = []);
+  var result;
   if (!(tree instanceof Array)) {
     return acc.concat(format("%j", tree));
   } else if (tree.length == 0) {
     return [acc];
   } else if (tree[0] == "unquote") {
-    return acc.concat(tree.slice(1));
+    result = compile(tree[1]);
+    return acc.concat(result);
   } else if (tree[0] == "unquote_dash_splice") {
-    return acc.concat(tree[1]);
+    result = [format("%j", tree[0]), tree[1]];
+    return acc.concat([result]);
   } else {
     head = tree[0];
     tail = tree.slice(1);
@@ -389,7 +392,7 @@ function arr_to_str (el) {
 def_special_form("quasiquote", function(fname, args) {
   var thing = args[0],
       result = qquote_rec(thing, [])[0];
-  return arr_to_str(result);
+  return format("assemble_spliced_tree(%s)", arr_to_str(result));
 });
 
 

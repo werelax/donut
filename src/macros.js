@@ -99,7 +99,7 @@ var expand_dash_macro = (function(expr, scope) {
                 })((walk_dash_code([expansion], scope)[0]));
             })((macro["apply"]({}, params)));
         })((_star_macros_star_[name]));
-    })((expr[0]), (((expr.slice(1))).map(compile)));
+    })((expr[0]), (expr.slice(1)));
 });
 var walk_dash_code = (function(ast, scope) {
     scope || (scope = [{}]);

@@ -95,8 +95,7 @@
 
 (define (expand-macro expr scope)
   (let ((name (car expr))
-        (params (map compile
-                     (cdr expr))))
+        (params (cdr expr)))
     (let ((macro (get name *macros*)))
       (let ((expansion (.apply macro {} params)))
         (let ((expanded-ast (car (walk-code
