@@ -7,6 +7,14 @@ var decorate = require('js-beautify').js_beautify;
 
 // node donut.js <file.dt>
 
+var filename = process.argv[process.argv.length - 1],
+    command;
+
+if (process.argv.length == 3) {
+  command = "compile";
+} else {
+  command = process.argv[2];
+}
 
 read_file("./lib/prelude.js", 'utf-8', function(err, data) {
   if (err) throw err;
@@ -16,7 +24,7 @@ read_file("./lib/prelude.js", 'utf-8', function(err, data) {
     if (err) throw err;
       var prelude = data + "\n\n;;== END OF PRELUDE\n\n";
 
-    read_file(process.argv[2], 'utf-8', function(err, data) {
+    read_file(filename, 'utf-8', function(err, data) {
       if (err) throw err;
       var donut_code = data;
       var expanded = macroexpand(read(prelude + donut_code));
@@ -34,9 +42,12 @@ read_file("./lib/prelude.js", 'utf-8', function(err, data) {
       // console.log("\n== JS: \n");
       // console.log(decorate(code));
       // console.log("\n== RUN: \n");
-      // eval(js_prelude + prelude + code);
 
-      console.log(format("%s", decorate(code)));
+      if (command == "run") {
+        eval(js_prelude +  code);
+      } else {
+        console.log(format("%s", decorate(code)));
+      }
     });
   });
 });

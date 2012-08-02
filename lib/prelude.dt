@@ -43,13 +43,3 @@
     nil
     (cons (list (car list) (cadr list))
           (in-pairs (cddr list)))))
-
-(define (flatten list)
-  (letrec ((flatten-aux (lambda (list acc)
-                      (if (null? list)
-                        acc
-                        (progn
-                          (map (lambda (e) (push e acc))
-                                 (car list))
-                          (flatten-aux (cdr list)))))))
-    (flatten-aux list ())))

@@ -9,27 +9,34 @@
 
 (eval (read-file "./lib/prelude.js" "utf-8"))
 
+
+(define (code-walker tree (acc []))
+  (cond
+    ((or (null? tree)
+         (not (pair? tree))) tree)
+    ))
+
+
 ;; Inspect and modify scope
 
 (define (create-scope? expr)
-  (or
-    (= (car expr) "define")
-    (and (pair? (car expr))
-         (= (caar expr) "lambda"))))
+  (case (car expr)
+    (("define" "var" "lambda") true)
+    (else false)))
 
-;; Just two ways to create contexts:
-;; defines or closures
+;; Just three ways to create contexts:
+;; define/var or closures
 (define (add-to-scope expr scope)
-  (cond
-    ((= (car expr) "define") (add-define-to-scope expr scope))
-    (else (add-closure-to-scope expr scope))))
+  (case (car expr)
+    (("define" "var") (add-define-to-scope expr scope))
+    ("lambda" (add-closure-to-scope expr scope))))
 
 (define (add-symbol-to-scope symbol value scope)
   (let ((current-scope (car scope)))
     (set! (get symbol current-scope) value)))
 
 (define (add-lambda-to-scope symbol params body scope)
-  (let ((fn (.concat (list 'lambda params) body)))
+  (let ((fn  `(lambda ,params ,@body)))
     (add-symbol-to-scope symbol fn scope)))
 
 (define (add-define-to-scope expr scope)
@@ -48,7 +55,7 @@
                            (let ((symbol (car pair))
                                  (value (walk-code (cadr pair) scope false)))
                              (add-symbol-to-scope symbol value scope)
-                             `(symbol value)))
+                             `(,symbol ,value)))
                          pairs)))
       `(define ,@(flatten walked-pairs)))))
 
