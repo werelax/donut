@@ -109,7 +109,7 @@ def_prefix_reader_macro(".", function(stream) {
 });
 
 def_delimited_reader_macro("[", function(stream) {
-  return format("(make-vector %s)", strip_delimiters(stream));
+  return format("(make-vector %s)", stream);
 });
 
 def_delimited_reader_macro("{", function(stream) {

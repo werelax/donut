@@ -20,6 +20,7 @@ read_file("./lib/prelude.js", 'utf-8', function(err, data) {
       if (err) throw err;
       var donut_code = data;
       var expanded = macroexpand(read(prelude + donut_code));
+      var last = expanded[expanded.length-1];
       var code = expanded.map(compile).concat('').join(";\n");
 
       // DISABLE MACROS (if something goes terrybly wrong)

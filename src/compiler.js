@@ -20,7 +20,6 @@ function gensym () {
 var special_forms = {};
 
 function compile(ast) {
-  if (!ast) { return ''; }
   var fname, fargs, transformation, js_code;
   if (is_array(ast)) {
     fname = compile(ast[0]);
@@ -58,7 +57,7 @@ function declare_operator (name, jsop) {
 function declare_comparison (name, op) {
   op || (op = name);
   def_special_form(name, function(fname, args) {
-    return "(" + args.map(compile).join(" "+op+" ") + ")";
+    return "(" + str_dash_join(args.map(compile), " "+op+" ") + ")";
   });
 }
 
@@ -92,7 +91,13 @@ declare_prefix_op('negate', '-');
 // Base type conversions
 
 def_special_form('_function_call', function(fname, args) {
-  return fname + "(" + args.map(compile).join(', ') + ")";
+  if (fname == "") {
+    // its just an empty list
+    return "[]";
+  } else {
+    var arguments = str_dash_join(args.map(compile), ", ");
+    return fname + "(" + arguments + ")";
+  }
 });
 
 def_special_form('make_dash_vector', function(fname, args) {
@@ -111,13 +116,8 @@ def_special_form('make_dash_object', function(fname, args) {
     value = args.shift();
     props.push(key + ": " + value);
   }
-  return "{" + props.join(", ") + "}";
+  return "{" + str_dash_join(props, ", ") + "}";
 });
-
-def_special_form("str", function(fname, args) {
-  var result = args.map(compile).join('');
-  return format("\"%s\"", result);
-})
 
 def_special_form("defmacro", function(fname, args) {
   // macros doesn't get compiled
@@ -127,48 +127,8 @@ def_special_form("defmacro", function(fname, args) {
 // Basic "LIST" operations
 
 def_special_form("list", function(fname, args) {
-  var args = args.map(compile);
-  return format("[%s]", args.join(", "));
-});
-
-def_special_form("car", function(fname, args) {
-  var list = compile(args[0]);
-  return format("( %s[0] )", list);
-});
-
-def_special_form("cdr", function(fname, args) {
-  var list = compile(args[0]);
-  return format("( %s.slice(1) )", list);
-});
-
-def_special_form("nth", function(fname, args) {
-  var index = compile(args[0]),
-      list = compile(args[1]);
-  return format("(%s[%s])", list, index);
-});
-
-def_special_form("cadr", function(fname, args) {
-  return special_forms["nth"](fname, [1].concat(args));
-});
-
-def_special_form("caddr", function(fname, args) {
-  return special_forms["nth"](fname, [2].concat(args));
-});
-
-def_special_form("cddr", function(fname, args) {
-  var list = compile(args[0]);
-  return format("(%s.slice(2))", list);
-});
-
-def_special_form("cdddr", function(fname, args) {
-  var list = compile(args[0]);
-  return format("(%s.slice(3))", list);
-});
-
-def_special_form("map", function(fname, args) {
-  var fn = compile(args[0]),
-      list = compile(args[1]);
-  return format("((%s).map(%s))", list, fn);
+  args = args.map(compile);
+  return format("[%s]", str_dash_join(args, ", "));
 });
 
 // Base assignment operations
@@ -182,6 +142,22 @@ function in_groups_of(list, n) {
   return result;
 }
 
+// The difference between var/define:
+// - var is just to declare the variable.
+// - Ok, right know define does more or less the same..
+//   but I still don't fully understand the semantics
+//   of the scheme's decfine, but I think is for globals
+def_special_form("var", function(fname, args) {
+  var pairs = in_groups_of(args, 2),
+      expansion = function (p) {
+        return format("var %s = %s",
+                      compile(p[0]),
+                      p[1] ? compile(p[1]) : "undefined");
+      }
+      definitions = pairs.map(expansion);
+  return str_dash_join(definitions, '; ');
+});
+
 def_special_form("define", function(fname, args) {
   if (is_array(args[0])) return special_forms['define_dash_lambda'](fname, args);
   var pairs = in_groups_of(args, 2),
@@ -191,7 +167,7 @@ def_special_form("define", function(fname, args) {
                       p[1] ? compile(p[1]) : "undefined");
       }
       definitions = pairs.map(expansion);
-  return definitions.concat('').join('; ');
+  return str_dash_join(definitions.concat(''), '; ');
 });
 
 def_special_form("define_dash_lambda", function(fname, args) {
@@ -216,13 +192,6 @@ def_special_form("get", function(fname, args) {
   var index = compile(args[0]),
       obj = compile(args[1]);
   return format("(%s[%s])", obj, index);
-});
-
-def_special_form("method_dash_call", function(fname, args) {
-  var method_name = compile(args[0]),
-      object = compile(args[1]),
-      params = args.slice(2).map(compile);
-  return format("(%s[\"%s\"](%s))", object, method_name, params.join(", "));
 });
 
 // Base flow operations
@@ -261,16 +230,16 @@ def_special_form("case", function(fname, args) {
   function expand_clause (clause) {
     // the [].concat(..) trick makes sure it ends as an array
     var value_list = ([].concat(clause[0])).map(compile),
-        value_code = value_list.map(function(v) {
+        value_code = str_dash_join(value_list.map(function(v) {
           if (v == "else") {
             return "default:";
           } else {
             return format("case %s:\n", v);
           }
-        }).join(''),
+        }), ""),
         body = clause.slice(1).map(compile),
         last = format("return %s;", body.pop()),
-        body_code = body.concat([last, "break", ""]).join(";\n") ;
+        body_code = str_dash_join(body.concat([last, "break", ""]), ";\n") ;
     return value_code + body_code;
   }
   var test = compile(args[0]),
@@ -279,7 +248,7 @@ def_special_form("case", function(fname, args) {
   return format("(function(%s) { switch(%s) { %s }})(%s)",
                 symb,
                 symb,
-                clauses.map(expand_clause).join(''),
+                str_dash_join(clauses.map(expand_clause), ''),
                 test);
 });
 
@@ -319,42 +288,25 @@ function params_helpers(params) {
 
 def_special_form("lambda", function(fname, args) {
   var parsed_params = params_helpers(args[0]),
-      params = parsed_params[0].map(compile),
-      params_helper_code = parsed_params[1],
+      params = parsed_params[0].map(compile);
+
+  var params_helper_code = parsed_params[1],
       body = args.slice(1).map(compile),
       last = body.pop();
-  // just to make .join() add an ending ;
+  // just to make .str_dash_join() add an ending ;
   body.push('');
   return format("(function(%s) { %s  %s return %s; })",
-                params,
+                params ? params : '',
                 params_helper_code,
-                body.join(";\n"),
+                str_dash_join(body, ";\n"),
                 last);
 });
 
 def_special_form("progn", function(fname, args) {
-  return format("( %s )", args.map(compile).join(', '));
+  return format("( %s )", str_dash_join(args.map(compile), ', '));
 });
 
 /* Environment operations */
-
-def_special_form("let", function(fname, args) {
-  var bindings = args[0],
-      names = [],
-      values = [],
-      body = args.slice(1).map(compile),
-      last = body.pop();
-  body.push('');
-  bindings.forEach(function(b) {
-    names.push(b[0]);
-    values.push(compile(b[1]));
-  });
-  return format("(function(%s){ %s return %s;\n })(%s)",
-                names.join(", "),
-                body.join(";\n"),
-                last,
-                values.join(", "));
-});
 
 /* Syntax operators */
 
@@ -413,21 +365,34 @@ function qquote_rec (tree, acc) {
 
 function arr_to_str (el) {
   if (el instanceof Array) {
-    return format("[ %s ]", el.map(arr_to_str).join(', '));
+    return format("[ %s ]", str_dash_join(el.map(arr_to_str), ', '));
   } else {
     return el;
   }
 }
 
 def_special_form("quote", function(fname, args) {
-  var thing = args[0];
-  return format("%j", quote_rec(thing, [])[0]);
+  var thing = args[0],
+      quoted = quote_rec(thing)[0];
+  if (quoted == "") {
+    // its just a ()
+    return "[]";
+  } else {
+    return format("%j", quoted);
+  }
 });
 
 def_special_form("quasiquote", function(fname, args) {
   var thing = args[0],
       result = qquote_rec(thing, [])[0];
-  return format("assemble_spliced_tree(%s)", arr_to_str(result));
+  if (is_array(result)
+      && result.length == 1
+      && result[0] == '""') {
+    // its just a ()
+    return "[]";
+  } else {
+    return format("assemble_spliced_tree(%s)", arr_to_str(result));
+  }
 });
 
 

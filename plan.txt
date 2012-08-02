@@ -2,3 +2,9 @@
   - Move as many special forms as possible to the DONUT prelude as macros
   - Move as many operations as possible from the body of the compiler to the JAVASCRIPT compiler
   - Look for a better way to automatically load the JAVASCRIPT AND DONUT preludes everywhere
+
+;;
+
+((lambda (x))
+  (defmacro (jarl)
+    `(console.log x)) 1)

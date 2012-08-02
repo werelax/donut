@@ -1,24 +1,55 @@
-(define (let_star_aux bindings body)
-  (console.log body)
-  (if (null? bindings)
-  `(progn ,@body)
-  (let ((name (car (car bindings)))
-        (value (cadr (car bindings))))
-    `((lambda (,name)
-       ,(let_star_aux (cdr bindings) body))
-      ,value))))
+;; I'm leaving this previous, more CORRECT
+;; implementation of (let) just in case the
+;; new (faster) one gives troube
+;;
+;; (define (let_aux bindings body)
+;;   ((lambda (symbols values)
+;;      `((lambda (,@symbols)
+;;          (progn ,@body))
+;;        ,@values))
+;;      (map car bindings)
+;;      (map cadr bindings)))
+;;
+;; (defmacro (let bindings . body)
+;;   (let_aux bindings body))
+
+(define (__faster_let_aux bindings body)
+  `((lambda ()
+      ,@(map (lambda (binding)
+               `(var ,(car binding)
+                     ,(cadr binding)))
+             bindings)
+        (progn ,@body))))
+
+(defmacro (let bindings . body)
+  (__faster_let_aux bindings body))
+
+;; Thanks to the cheaty let implementation,
+;; it's recursive and self-referential by default!
 
 (defmacro (let_star_ bindings . body)
-  (let_star_aux bindings body))
+  `(let ,bindings ,@body))
 
-(defmacro (lot bindings body)
-  `(console.log ,(if (> (get :length bindings) 2)
-                   "MUU LARGO, dijo la vaca"
-                   "Pste, dijo la serpiente")))
+(defmacro (letrec bindings . body)
+  `(let ,bindings ,@body))
 
-(defmacro (let-alias bindings body)
-  `(let ,bindings ,body))
 
-(let ((akan '"AKAN!"))
-  (defmacro (scream t)
-    `(console.log ,akan ,t)))
+;; Utilities
+
+;; Rewrite this as a more general (partition-by 2 list)
+;; when we have some kind of (do) macro
+(define (in-pairs list)
+  (if (null? list)
+    nil
+    (cons (list (car list) (cadr list))
+          (in-pairs (cddr list)))))
+
+(define (flatten list)
+  (letrec ((flatten-aux (lambda (list acc)
+                      (if (null? list)
+                        acc
+                        (progn
+                          (map (lambda (e) (push e acc))
+                                 (car list))
+                          (flatten-aux (cdr list)))))))
+    (flatten-aux list ())))

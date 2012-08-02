@@ -12,14 +12,17 @@
 ;; Inspect and modify scope
 
 (define (create-scope? expr)
-  (case (car expr)
-    (("define" "let") true)
-    (else false)))
+  (or
+    (= (car expr) "define")
+    (and (pair? (car expr))
+         (= (caar expr) "lambda"))))
 
+;; Just two ways to create contexts:
+;; defines or closures
 (define (add-to-scope expr scope)
-  (case (car expr)
-    ("define" (add-define-to-scope expr scope))
-    ("let" (add-let-to-scope expr scope))))
+  (cond
+    ((= (car expr) "define") (add-define-to-scope expr scope))
+    (else (add-closure-to-scope expr scope))))
 
 (define (add-symbol-to-scope symbol value scope)
   (let ((current-scope (car scope)))
@@ -30,25 +33,39 @@
     (add-symbol-to-scope symbol fn scope)))
 
 (define (add-define-to-scope expr scope)
-  (let ((symbol (cadr expr))
-        (value (walk-code (.slice expr 2) true)))
-    (if (pair? symbol)
-      (add-lambda-to-scope (car symbol) (cdr symbol) value scope)
-      (add-symbol-to-scope symbol (car value) scope))
-    expr))
+  (if (pair? (cadr expr))
+    ;; lambda
+    (let ((signature (cadr expr))
+          (body (cddr expr)))
+      (add-lambda-to-scope (car signature)
+                           (cdr signature)
+                           (walk-code value scope false)
+                           scope)
+      `(define ,signature ,@value))
+    ;; symbol-value pairs
+    (let* ((pairs (in-pairs (cdr expr)))
+      (walked-pairs (map (lambda (pair)
+                           (let ((symbol (car pair))
+                                 (value (walk-code (cadr pair) scope false)))
+                             (add-symbol-to-scope symbol value scope)
+                             `(symbol value)))
+                         pairs)))
+      `(define ,@(flatten walked-pairs)))))
 
-(define (add-let-to-scope expr scope)
-  (let ((header (.slice expr 0 2))
-        (definitions (cadr expr))
-        (body (.slice expr 2))
-        ;; create new scope!
-        (new-scope (cons {} scope)))
-    (map (lambda (pair)
-           (let ((symbol (car pair))
-                 (value (car (walk-code (cdr pair)))))
-             (add-symbol-to-scope symbol value new-scope)))
-         definitions)
-    (.concat header (walk-code body new-scope true))))
+(define (add-closure-to-scope expr scope)
+  (let* ((definition (car expr))
+         (params (cadr definition))
+         (body (cddr definition))
+         (vals (map (lambda (v) (walk-code v scope))
+                    (cdr expr)))
+         (new-scope (cons {} scope)))
+    (map (lambda (name value)
+           (add-symbol-to-scope name value new-scope))
+         params
+         vals)
+    `((lambda ,params
+       ,(walk-code body new-scope true))
+      ,@vals)))
 
 ;; Scope evaluation context
 
@@ -65,20 +82,28 @@
         (let ((kv-pairs (map (lambda (k) (list k (compile (get k bindings))))
                              keys)))
           (format "(function(%s){ return %s; })(%s)"
-                  (.join keys ", ")
+                  (str-join keys ", ")
                   (build-scope (butlast scope))
-                  (.join (map (lambda (p)
+                  (str-join (map (lambda (p)
                                 (format "(%s=%s)" (car p) (cadr p)))
                               kv-pairs)
                          ", "))))
       "(%s = %s)")))
+
+;; Quoted
+
+(define (is-quoted? expr)
+  (and (pair? expr)
+       (or (== (car expr "quote"))
+           (== (car expr "quasiquote")))))
 
 ;; Macro definition
 
 (define *macros* {})
 
 (define (is-macro-definition? expr)
-  (eq? (car expr) "defmacro"))
+  (and expr
+       (eq? (car expr) "defmacro")))
 
 (define (create-macro expr scope)
   (let ((signature (cadr expr)))
@@ -94,9 +119,10 @@
 ;; Macro expansion
 
 (define (is-macro-expansion? expr)
-  (some (lambda (macro)
-          (eq? macro (car expr)))
-        (get-keys *macros*)))
+  (and expr
+       (some (lambda (macro)
+               (eq? macro (car expr)))
+             (get-keys *macros*))))
 
 (define (expand-macro expr scope)
   (let ((name (car expr))
@@ -111,14 +137,16 @@
 
 (define (walk-code ast scope scope-aware)
   ;; lets get to the thing!
-  (if (null? ast)
-    nil
+  (if (or (not (pair? ast))
+          (null? ast))
+    ast
     (let ((expr (car ast)))
       (let ((next (cond
                     ((and scope-aware (create-scope? expr)) (add-to-scope expr scope))
                     ((is-macro-definition? expr) (create-macro expr scope))
                     ((is-macro-expansion? expr) (expand-macro expr scope))
-                    ((pair? expr) (cons (car expr)
+                    ((is-quoted?) expr)
+                    ((pair? expr) (cons (walk-code (car expr) scope scope-aware)
                                         (walk-code (cdr expr) scope scope-aware)))
                     (else expr)))
             (rest (walk-code (cdr ast) scope scope-aware)))
