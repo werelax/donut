@@ -1,10 +1,6 @@
-* No se pueden poner comillas escapadas en los strings!
-
 * (define jarl [{}])
   - no compila, se hace un lío parseando {}
   - funciona con (define jarl (list {}))
-
-* -1 se traduce por _dash_1
 
 * con (define (some a b c))
   - Si los parámetros NO son pairs, se incrusta igualmente a || (a = undefined)

@@ -134,10 +134,20 @@ def_reader('(', function(stream) {
 
 // string
 def_reader('"', function(stream) {
-  // XXX: In this shitty implementaiton, you cannot embed \" or \' inside strings!
+  function find_closing_quote(string, str_char, acc) {
+    acc || (acc = 0);
+    var end = string.indexOf(str_char);
+    if (end == -1) {
+      throw new Error("Unclosed string: ", string);
+    } else if ((end == 0 && acc == 0) || string[end-1] == "\\") {
+      return find_closing_quote(string.slice(end + 1), str_char, acc + end + 1);
+    } else {
+      return acc + end;
+    }
+  }
   var string_char = stream[0],
-      string_end = stream.substr(1).indexOf(string_char) + 2,
-      string = stream.substr(0, string_end).trim(),
+      string_end = find_closing_quote(stream, string_char) + 1,
+      string = stream.substr(0, string_end),
       remainder = stream.substring(string_end);
   return [{type: 'string', stream: string}, remainder];
 });
@@ -179,16 +189,39 @@ function select_reader (stream) {
 
 /* Parsers */
 
+
 function to_js_name(string) {
-  // XXX: This function is really stupid
-  // please, improve the detection a little
-  // so (* 1 2) doesn't goes as (_star_ 1 2)
-  // or -1 as _dash_1
-  return string
-          .replace(/-/g, '_dash_')
-          .replace(/\*/g, '_star_')
-          .replace(/\?/g, '_qmark')
-          ;
+  function in_word (c, word) {
+    var regex = new RegExp("\\w+" + c + "\\w+");
+    return !!word.match(regex);
+  }
+  function next_to_word(c, word) {
+    var l_regex = new RegExp("\\w+" + c);
+    var r_regex = new RegExp(c + "\\w+");
+    return (!!word.match(l_regex))
+           || (!!word.match(r_regex));
+  }
+  function replace_with(c, rep, word) {
+    var regex = new RegExp(c, 'g');
+    return word.replace(regex, rep);
+  }
+  function prune_with(word, arr, fn) {
+    return arr.reduce(function (acc, p) {
+      var char = p[0],
+          rep = p[1];
+      if (fn(char, acc)) {
+        return replace_with(char, rep, acc);
+      } else {
+        return acc;
+      }
+    }, word);
+  }
+  var inside = [["-", "_dash_"]];
+  var outside = [["\\*", "_star_"], ["\\?", "_qmark"], ["\\!", "_bang"]];
+
+  string = prune_with(string, inside, in_word);
+  string = prune_with(string, outside, next_to_word);
+  return string;
 }
 
 var parsers = {

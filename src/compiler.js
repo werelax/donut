@@ -72,8 +72,8 @@ function declare_prefix_op(name, op) {
 /* Special form definitions */
 
 declare_operator("+");
-declare_operator("_dash_", "-");
-declare_operator("_star_", "*");
+declare_operator("-", "-");
+declare_operator("*", "*");
 declare_operator("/");
 declare_operator("%");
 
@@ -204,7 +204,7 @@ def_special_form("define_dash_lambda", function(fname, args) {
                 special_forms["lambda"](fname, [lambda_params].concat(body)));
 });
 
-def_special_form("set!", function(fname, args) {
+def_special_form("set_bang", function(fname, args) {
   var symbol = compile(args[0]),
       value = compile(args[1]);
   return format("(%s = %s)", symbol, value);
