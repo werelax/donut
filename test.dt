@@ -17,3 +17,7 @@
 (if (this "should be false")
  (alert "akandemorl")
  (alert "always false"))
+
+(lambda rest console.log(rest))
+
+(lambda (a . b) console.log(b))

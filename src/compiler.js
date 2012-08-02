@@ -1,7 +1,7 @@
-var _ = require('underscore');
 var format = require('util').format;
 var read = require('./reader.js').read;
 var read_file = require('fs').readFileSync;
+var is_array = require('util').isArray;
 
 /* Prelude */
 
@@ -22,7 +22,7 @@ var special_forms = {};
 function compile(ast) {
   if (!ast) { return ''; }
   var fname, fargs, transformation, js_code;
-  if (_.isArray(ast)) {
+  if (is_array(ast)) {
     fname = compile(ast[0]);
     args = ast.slice(1);
     transformation = special_forms[fname] || special_forms['_function_call'];
@@ -183,7 +183,7 @@ function in_groups_of(list, n) {
 }
 
 def_special_form("define", function(fname, args) {
-  if (_.isArray(args[0])) return special_forms['define_dash_lambda'](fname, args);
+  if (is_array(args[0])) return special_forms['define_dash_lambda'](fname, args);
   var pairs = in_groups_of(args, 2),
       expansion = function (p) {
         return format("var %s = %s",
@@ -288,17 +288,30 @@ def_special_form("case", function(fname, args) {
 function params_helpers(params) {
   var len = params.length,
       helper_code = "",
-      param, name, value;
-  for (var i=0; i<len; i++) {
-    param = params[i];
-    if (_.isArray(param)) {
-      name = param[0];
-      value = param[1];
-      helper_code += format("%s || (%s = %s); ",
-                            name,
-                            name,
-                            compile(value));
-      params[i] = name;
+      param, name, value, rest;
+  if (!is_array(params)) {
+    helper_code += format("%s = Array.prototype.slice.call(arguments);",
+                          params);
+    params = [params];
+  } else {
+    for (var i=0; i<len; i++) {
+      param = params[i];
+      if (is_array(param)) {
+        name = param[0];
+        value = param[1];
+        helper_code += format("%s || (%s = %s); ",
+                              name,
+                              name,
+                              compile(value));
+        params[i] = name;
+      } else if (param.trim() == "method_dash_call") {
+        rest = params[i+1];
+        params.splice(i, 1);
+        helper_code += format("%s = Array.prototype.slice.call(arguments, %d);",
+                              rest,
+                              i);
+        break;
+      }
     }
   }
   return [params, helper_code];
@@ -364,7 +377,7 @@ function quote_rec (tree, acc) {
 // expansion phase
 
 function unq_escape (tree) {
-  if (!_.isArray(tree)) {
+  if (!is_array(tree)) {
     if (tree[0] == "\"") {
       return format("%j", tree);
     } else {
