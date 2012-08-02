@@ -26,7 +26,7 @@
     (set! (get symbol current-scope) value)))
 
 (define (add-lambda-to-scope symbol params body scope)
-  (let ((fn (.concat '("lambda" params) body)))
+  (let ((fn (.concat (list 'lambda params) body)))
     (add-symbol-to-scope symbol fn scope)))
 
 (define (add-define-to-scope expr scope)
@@ -81,7 +81,8 @@
           (args (cdr signature))
           (body (walk-code (cddr expr) scope)))
       (let ((macro-function
-              (compile (.concat '("lambda" args) body))))
+              (compile (.concat (list 'lambda args) body))))
+        (console.log (format "CREATED MACRO %s: %s" name macro-function))
         ;; store the compiled-evaled macro-func in the global macro dictionary
         (set! (get name *macros*) (eval (run-with-scope name macro-function scope))))
       expr)))
@@ -95,9 +96,8 @@
 
 (define (expand-macro expr scope)
   (let ((name (car expr))
-        (params (map eval ;; not sure about this EVAL!
-                     (map compile
-                          (cdr expr)))))
+        (params (map compile
+                     (cdr expr))))
     (let ((macro (get name *macros*)))
       (let ((expansion (.apply macro {} params)))
         (let ((expanded-ast (car (walk-code

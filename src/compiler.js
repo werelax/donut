@@ -363,7 +363,7 @@ def_special_form("quote", function(fname, args) {
 function qquote_rec (tree, acc) {
   acc || (acc = []);
   if (!(tree instanceof Array)) {
-    return acc.concat(format("\"%s\"", tree));
+    return acc.concat(format("%j", tree));
   } else if (tree.length == 0) {
     return [acc];
   } else if (tree[0] == "unquote") {
@@ -378,17 +378,18 @@ function qquote_rec (tree, acc) {
   }
 }
 
-function arr_to_str (arr) {
-  if (arr instanceof Array) {
-    return format("[ %s ]", arr.map(arr_to_str).join(', '));
+function arr_to_str (el) {
+  if (el instanceof Array) {
+    return format("[ %s ]", el.map(arr_to_str).join(', '));
   } else {
-    return arr;
+    return el;
   }
 }
 
 def_special_form("quasiquote", function(fname, args) {
   var thing = args[0],
       result = qquote_rec(thing, [])[0];
+  console.log(format("RESULT: %j", result));
   return arr_to_str(result);
 });
 

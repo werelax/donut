@@ -79,6 +79,7 @@ var create_dash_macro = (function(expr, scope) {
     return (function(signature) {
         return (function(name, args, body) {
             (function(macro_dash_function) {
+                console.log(format("CREATED MACRO %s: %s", name, macro_dash_function));
                 return ((_star_macros_star_[name]) = eval(run_dash_with_dash_scope(name, macro_dash_function, scope)));
             })(compile((["lambda", args]["concat"](body))));
             return expr;
@@ -99,7 +100,7 @@ var expand_dash_macro = (function(expr, scope) {
                 })((walk_dash_code([expansion], scope)[0]));
             })((macro["apply"]({}, params)));
         })((_star_macros_star_[name]));
-    })((expr[0]), (((((expr.slice(1))).map(compile))).map(eval)));
+    })((expr[0]), (((expr.slice(1))).map(compile)));
 });
 var walk_dash_code = (function(ast, scope) {
     scope || (scope = [{}]);
@@ -110,7 +111,6 @@ var walk_dash_code = (function(ast, scope) {
     })((ast[0]))));
 });
 var macroexpand = (function(ast) {
-    var expanded = ast ? (walk_dash_code(ast)) : null;
-    return ast ? expanded : ([]);
+    return ((ast) ? (walk_dash_code(ast)) : ([]));
 });
 ((exports["macroexpand"]) = macroexpand);
