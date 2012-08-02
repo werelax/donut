@@ -4,10 +4,8 @@
 ;;   `(let (,(car bindings))
 ;;      ,@(let* (cdr bindings) body)))
 
-;; (defmacro (lot bindings body)
-;;   `(console.log ,(if (> (.length bindings) 2)
-;;                    "MUU LARGO, dijo la vaca"
-;;                    "Pste, dijo la serpiente")))
-
 (defmacro (lot bindings body)
-  (list 'quote bindings))
+  `(console.log ,(if (> (get :length bindings) 2)
+                   '"MUU LARGO, dijo la vaca"
+                   '"Pste, dijo la serpiente")))
+

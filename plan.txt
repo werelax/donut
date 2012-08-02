@@ -1,2 +1,1 @@
-- Proper quote
-- Quasiquote/unquote and (gasp) unquote-splice
+* IMPORTANT: a way to capture the rest of the parameters, like (define (jarl a b . body))

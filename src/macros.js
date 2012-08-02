@@ -1,3 +1,5 @@
+/* macro lot omited */
+true;
 var read = (require("./reader.js")["read"]);
 var compile = (require("./compiler.js")["compile"]);
 var gensym = (require("./compiler.js")["gensym"]);
@@ -94,6 +96,7 @@ var expand_dash_macro = (function(expr, scope) {
     return (function(name, params) {
         return (function(macro) {
             return (function(expansion) {
+                console.log(format("%j", expansion));
                 return (function(expanded_dash_ast) {
                     return expanded_dash_ast;
                 })((walk_dash_code([expansion], scope)[0]));
