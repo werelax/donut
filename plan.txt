@@ -1,1 +1,4 @@
 * IMPORTANT: a way to capture the rest of the parameters, like (define (jarl a b . body))
+
+* LOOK INTO prelude.dt. Look at the UGLY way that strings had to be (quoted) in order to remain
+  beeing treated as strings. Whan can be the solution to this?

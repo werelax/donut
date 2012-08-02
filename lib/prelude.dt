@@ -1,11 +1,14 @@
-;; (defmacro (lot bindings body)
-;;   (if (null? bindings))
-;;   `(progn ,@body)
-;;   `(let (,(car bindings))
-;;      ,@(let* (cdr bindings) body)))
+(defmacro (let_star_ bindings body)
+  (if (null? bindings)
+  body
+  (let ((name (car (car bindings)))
+        (value (cadr (car bindings))))
+    `((lambda (,name)
+       ,(let_star_ (cdr bindings) body))
+      ,value))))
 
 (defmacro (lot bindings body)
   `(console.log ,(if (> (get :length bindings) 2)
-                   "MUU LARGO, dijo la vaca"
-                   "Pste, dijo la serpiente")))
+                   '"MUU LARGO, dijo la vaca"
+                   '"Pste, dijo la serpiente")))
 

@@ -19,8 +19,8 @@ read_file("./lib/prelude.js", 'utf-8', function(err, data) {
     read_file(process.argv[2], 'utf-8', function(err, data) {
       if (err) throw err;
       var donut_code = data;
-
-      var code = macroexpand(read(prelude + donut_code)).map(compile).concat('').join(";\n");
+      var expanded = macroexpand(read(prelude + donut_code));
+      var code = expanded.map(compile).concat('').join(";\n");
 
       // DISABLE MACROS (if something goes terrybly wrong)
       // var code = read(data).map(compile).concat('').join(";\n");
@@ -28,6 +28,8 @@ read_file("./lib/prelude.js", 'utf-8', function(err, data) {
       // TODO: Make all this info available with some command line options
       // console.log("== DONUT: \n");
       // console.log(donut_code);
+      // console.log("== TRANDFORMED: \n");
+      // console.log(format("%j", expanded));
       // console.log("\n== JS: \n");
       // console.log(decorate(code));
       // console.log("\n== RUN: \n");

@@ -24,8 +24,6 @@ function compile(ast) {
     js_code = transformation(fname, args);
     // This is the best point to inject the macro meta-evaluation of defines!
     return js_code;
-  } else if (ast[0] == "\"") {
-    return format("%s", ast);
   } else {
     return ast;
   }
@@ -372,10 +370,11 @@ function qquote_rec (tree, acc) {
   } else if (tree[0] == "unquote") {
     // The meta format is to preserve the "quotiness" for the
     // result of the expression (otherwise, strings will become symbols)
-    result = format("(format(\"%%j\", %s))", compile(tree[1]));
+    // result = format("(format(\"%%s\", %s))", compile(tree[1]));
+    result = compile(tree[1]);
     return acc.concat(result);
   } else if (tree[0] == "unquote_dash_splice") {
-    result = [format("%j", tree[0]), tree[1]];
+    result = [format("%j", tree[0]), compile(tree[1])];
     return acc.concat([result]);
   } else {
     head = tree[0];
