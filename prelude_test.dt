@@ -3,3 +3,8 @@
   (console.log (+ a b)))
 
 (lot (a 1 b 2) (console.log (+ a b)))
+
+(lit ((a 1) (b 2)) (console.log (+ a b)))
+
+(scream "HEY")
+

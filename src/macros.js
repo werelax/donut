@@ -1,5 +1,13 @@
+/* macro let_star_ omited */
+true;
 /* macro lot omited */
 true;
+/* macro lit omited */
+true;
+(function(akan) {
+    return /* macro scream omited */
+    true;
+})("\"AKAN!\"");
 var read = (require("./reader.js")["read"]);
 var compile = (require("./compiler.js")["compile"]);
 var gensym = (require("./compiler.js")["gensym"]);
@@ -45,7 +53,7 @@ var add_dash_define_dash_to_dash_scope = (function(expr, scope) {
     return (function(symbol, value) {
         ((pair_qmark(symbol)) ? (add_dash_lambda_dash_to_dash_scope((symbol[0]), (symbol.slice(1)), value, scope)) : (add_dash_symbol_dash_to_dash_scope(symbol, (value[0]), scope)));
         return expr;
-    })((expr[1]), walk_dash_code((expr["slice"](2))));
+    })((expr[1]), walk_dash_code((expr["slice"](2)), true));
 });
 var add_dash_let_dash_to_dash_scope = (function(expr, scope) {
     return (function(header, definitions, body, new_dash_scope) {
@@ -54,7 +62,7 @@ var add_dash_let_dash_to_dash_scope = (function(expr, scope) {
                 return add_dash_symbol_dash_to_dash_scope(symbol, value, new_dash_scope);
             })((pair[0]), (walk_dash_code((pair.slice(1)))[0]));
         })));
-        return (header["concat"](walk_dash_code(body, new_dash_scope)));
+        return (header["concat"](walk_dash_code(body, new_dash_scope, true)));
     })((expr["slice"](0, 2)), (expr[1]), (expr["slice"](2)), cons({}, scope));
 });
 var run_dash_with_dash_scope = (function(name, expr, scope) {
@@ -81,10 +89,10 @@ var create_dash_macro = (function(expr, scope) {
     return (function(signature) {
         return (function(name, args, body) {
             (function(macro_dash_function) {
-                return ((_star_macros_star_[name]) = eval(run_dash_with_dash_scope(name, macro_dash_function, scope)));
+                return ((_star_macros_star_[name]) = eval(run_dash_with_dash_scope(name, macro_dash_function, scope, false)));
             })(compile((["lambda", args]["concat"](body))));
             return expr;
-        })((signature[0]), (signature.slice(1)), walk_dash_code((expr.slice(2)), scope));
+        })((signature[0]), (signature.slice(1)), walk_dash_code((expr.slice(2)), scope, false));
     })((expr[1]));
 });
 var is_dash_macro_dash_expansion_qmark = (function(expr) {
@@ -98,20 +106,19 @@ var expand_dash_macro = (function(expr, scope) {
             return (function(expansion) {
                 return (function(expanded_dash_ast) {
                     return expanded_dash_ast;
-                })((walk_dash_code([expansion], scope)[0]));
+                })((walk_dash_code([expansion], scope, false)[0]));
             })((macro["apply"]({}, params)));
         })((_star_macros_star_[name]));
     })((expr[0]), (expr.slice(1)));
 });
-var walk_dash_code = (function(ast, scope) {
-    scope || (scope = [{}]);
+var walk_dash_code = (function(ast, scope, scope_dash_aware) {
     return ((null_qmark(ast)) ? (nil) : ((function(expr) {
         return (function(next, rest) {
             return cons(next, rest);
-        })(((create_dash_scope_qmark(expr)) ? ((add_dash_to_dash_scope(expr, scope))) : (((is_dash_macro_dash_definition_qmark(expr)) ? ((create_dash_macro(expr, scope))) : (((is_dash_macro_dash_expansion_qmark(expr)) ? ((expand_dash_macro(expr, scope))) : (((pair_qmark(expr)) ? ((cons((expr[0]), walk_dash_code((expr.slice(1)), scope)))) : ((expr))))))))), walk_dash_code((ast.slice(1)), scope));
+        })((((scope_dash_aware && create_dash_scope_qmark(expr))) ? ((add_dash_to_dash_scope(expr, scope))) : (((is_dash_macro_dash_definition_qmark(expr)) ? ((create_dash_macro(expr, scope))) : (((is_dash_macro_dash_expansion_qmark(expr)) ? ((expand_dash_macro(expr, scope))) : (((pair_qmark(expr)) ? ((cons((expr[0]), walk_dash_code((expr.slice(1)), scope, scope_dash_aware)))) : ((expr))))))))), walk_dash_code((ast.slice(1)), scope, scope_dash_aware));
     })((ast[0]))));
 });
 var macroexpand = (function(ast) {
-    return ((ast) ? (walk_dash_code(ast)) : ([]));
+    return ((ast) ? (walk_dash_code(ast, [{}], true)) : ([]));
 });
 ((exports["macroexpand"]) = macroexpand);

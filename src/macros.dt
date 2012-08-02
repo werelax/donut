@@ -31,7 +31,7 @@
 
 (define (add-define-to-scope expr scope)
   (let ((symbol (cadr expr))
-        (value (walk-code (.slice expr 2))))
+        (value (walk-code (.slice expr 2) true)))
     (if (pair? symbol)
       (add-lambda-to-scope (car symbol) (cdr symbol) value scope)
       (add-symbol-to-scope symbol (car value) scope))
@@ -48,7 +48,7 @@
                  (value (car (walk-code (cdr pair)))))
              (add-symbol-to-scope symbol value new-scope)))
          definitions)
-    (.concat header (walk-code body new-scope))))
+    (.concat header (walk-code body new-scope true))))
 
 ;; Scope evaluation context
 
@@ -79,11 +79,11 @@
   (let ((signature (cadr expr)))
     (let ((name (car signature))
           (args (cdr signature))
-          (body (walk-code (cddr expr) scope)))
+          (body (walk-code (cddr expr) scope false)))
       (let ((macro-function
               (compile (.concat (list 'lambda args) body))))
         ;; store the compiled-evaled macro-func in the global macro dictionary
-        (set! (get name *macros*) (eval (run-with-scope name macro-function scope))))
+        (set! (get name *macros*) (eval (run-with-scope name macro-function scope false))))
       expr)))
 
 ;; Macro expansion
@@ -100,26 +100,27 @@
       (let ((expansion (.apply macro {} params)))
         (let ((expanded-ast (car (walk-code
                                    (list expansion)
-                                   scope))))
+                                   scope
+                                   false))))
           expanded-ast)))))
 
-(define (walk-code ast (scope (list {})))
+(define (walk-code ast scope scope-aware)
   ;; lets get to the thing!
   (if (null? ast)
     nil
     (let ((expr (car ast)))
       (let ((next (cond
-                    ((create-scope? expr) (add-to-scope expr scope))
+                    ((and scope-aware (create-scope? expr)) (add-to-scope expr scope))
                     ((is-macro-definition? expr) (create-macro expr scope))
                     ((is-macro-expansion? expr) (expand-macro expr scope))
                     ((pair? expr) (cons (car expr)
-                                        (walk-code (cdr expr) scope)))
+                                        (walk-code (cdr expr) scope scope-aware)))
                     (else expr)))
-            (rest (walk-code (cdr ast) scope)))
+            (rest (walk-code (cdr ast) scope scope-aware)))
         (cons next rest)))))
 
 (define (macroexpand ast)
-  (if ast (walk-code ast) []))
+  (if ast (walk-code ast (list {}) true) [] true))
 
 ;; Exports just macroexpand
 

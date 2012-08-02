@@ -12,3 +12,9 @@
                    "MUU LARGO, dijo la vaca"
                    "Pste, dijo la serpiente")))
 
+(defmacro (lit bindings body)
+  `(let ,bindings ,body))
+
+(let ((akan '"AKAN!"))
+  (defmacro (scream t)
+    `(console.log ,akan ,t)))
