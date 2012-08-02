@@ -1,6 +1,11 @@
 var _ = require('underscore');
 var format = require('util').format;
 var read = require('./reader.js').read;
+var read_file = require('fs').readFileSync;
+
+/* Prelude */
+
+eval(read_file('./lib/prelude.js', 'utf-8'));
 
 /* global utils */
 
@@ -360,6 +365,25 @@ def_special_form("quote", function(fname, args) {
   return format("%j", quote_rec(thing, [])[0]);
 });
 
+
+// Aux function to duble-quote the strings,
+// so they doesn't become symbols in the
+// expansion phase
+
+function unq_escape (tree) {
+  if (!_.isArray(tree)) {
+    if (tree[0] == "\"") {
+      return format("%j", tree);
+    } else {
+      return tree;
+    }
+  } else {
+    return tree.reduce(function(acc, el) {
+      return append(unq_escape(el), acc);
+    }, []);
+  }
+}
+
 function qquote_rec (tree, acc) {
   acc || (acc = []);
   var result;
@@ -368,10 +392,7 @@ function qquote_rec (tree, acc) {
   } else if (tree.length == 0) {
     return [acc];
   } else if (tree[0] == "unquote") {
-    // The meta format is to preserve the "quotiness" for the
-    // result of the expression (otherwise, strings will become symbols)
-    // result = format("(format(\"%%s\", %s))", compile(tree[1]));
-    result = compile(tree[1]);
+    result = compile(unq_escape(tree[1]));
     return acc.concat(result);
   } else if (tree[0] == "unquote_dash_splice") {
     result = [format("%j", tree[0]), compile(tree[1])];
