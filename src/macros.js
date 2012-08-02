@@ -1,13 +1,3 @@
-/* macro let_star_ omited */
-true;
-/* macro lot omited */
-true;
-/* macro lit omited */
-true;
-(function(akan) {
-    return /* macro scream omited */
-    true;
-})("\"AKAN!\"");
 var read = (require("./reader.js")["read"]);
 var compile = (require("./compiler.js")["compile"]);
 var gensym = (require("./compiler.js")["gensym"]);
@@ -67,16 +57,21 @@ var add_dash_let_dash_to_dash_scope = (function(expr, scope) {
 });
 var run_dash_with_dash_scope = (function(name, expr, scope) {
     return (function(scope_dash_closure) {
+        (function(decorate) {
+            return console.log(format("%s", decorate(format(scope_dash_closure, name, compile(expr)))));
+        })((require("js-beautify")["js_beautify"]));
         return format(scope_dash_closure, name, compile(expr));
     })(build_dash_scope(scope));
 });
 var build_dash_scope = (function(scope) {
     return (function(bindings) {
         return ((bindings) ? ((function(keys) {
-            return (function(values) {
-                return format("(function(%s){ return %s; })(%s)", (keys["join"](", ")), build_dash_scope(butlast(scope)), (values["join"](", ")));
+            return (function(kv_dash_pairs) {
+                return format("(function(%s){ return %s; })(%s)", (keys["join"](", ")), build_dash_scope(butlast(scope)), (((kv_dash_pairs).map((function(p) {
+                    return format("(%s=%s)", (p[0]), (p[1]));
+                })))["join"](", ")));
             })(((keys).map((function(k) {
-                return compile((bindings[k]));
+                return [k, compile((bindings[k]))];
             }))));
         })(get_dash_keys(bindings))) : ("(%s = %s)"));
     })(last(scope));

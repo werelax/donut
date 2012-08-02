@@ -54,18 +54,23 @@
 
 (define (run-with-scope name expr scope)
   (let ((scope-closure (build-scope scope)))
+    (let ((decorate (get :js_beautify (require "js-beautify"))))
+      (console.log (format "%s" (decorate (format scope-closure name (compile expr))))))
     (format scope-closure name (compile expr))))
 
 (define (build-scope scope)
   (let ((bindings (last scope)))
     (if bindings
       (let ((keys (get-keys bindings)))
-        (let ((values (map (lambda (k) (compile (get k bindings)))
-                           keys)))
+        (let ((kv-pairs (map (lambda (k) (list k (compile (get k bindings))))
+                             keys)))
           (format "(function(%s){ return %s; })(%s)"
                   (.join keys ", ")
                   (build-scope (butlast scope))
-                  (.join values ", "))))
+                  (.join (map (lambda (p)
+                                (format "(%s=%s)" (car p) (cadr p)))
+                              kv-pairs)
+                         ", "))))
       "(%s = %s)")))
 
 ;; Macro definition
