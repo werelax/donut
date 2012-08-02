@@ -389,7 +389,6 @@ function arr_to_str (el) {
 def_special_form("quasiquote", function(fname, args) {
   var thing = args[0],
       result = qquote_rec(thing, [])[0];
-  console.log(format("RESULT: %j", result));
   return arr_to_str(result);
 });
 

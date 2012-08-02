@@ -79,7 +79,6 @@ var create_dash_macro = (function(expr, scope) {
     return (function(signature) {
         return (function(name, args, body) {
             (function(macro_dash_function) {
-                console.log(format("CREATED MACRO %s: %s", name, macro_dash_function));
                 return ((_star_macros_star_[name]) = eval(run_dash_with_dash_scope(name, macro_dash_function, scope)));
             })(compile((["lambda", args]["concat"](body))));
             return expr;

@@ -82,7 +82,6 @@
           (body (walk-code (cddr expr) scope)))
       (let ((macro-function
               (compile (.concat (list 'lambda args) body))))
-        (console.log (format "CREATED MACRO %s: %s" name macro-function))
         ;; store the compiled-evaled macro-func in the global macro dictionary
         (set! (get name *macros*) (eval (run-with-scope name macro-function scope))))
       expr)))
