@@ -2,6 +2,7 @@ var read = require('./src/reader.js').read;
 var compile = require('./src/compiler.js').compile;
 var macroexpand = require('./src/macros.js').macroexpand;
 var read_file = require('fs').readFile;
+var format = require('util').format;
 var decorate = require('js-beautify').js_beautify;
 
 // node donut.js <file.dt>
@@ -32,7 +33,7 @@ read_file("./lib/prelude.js", 'utf-8', function(err, data) {
       // console.log("\n== RUN: \n");
       // eval(js_prelude + prelude + code);
 
-      console.log(decorate(code));
+      console.log(format("%s", decorate(code)));
     });
   });
 });

@@ -6,6 +6,6 @@
 
 (defmacro (lot bindings body)
   `(console.log ,(if (> (get :length bindings) 2)
-                   '"MUU LARGO, dijo la vaca"
-                   '"Pste, dijo la serpiente")))
+                   "MUU LARGO, dijo la vaca"
+                   "Pste, dijo la serpiente")))
 
