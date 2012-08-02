@@ -1,10 +1,11 @@
 (define (let_star_aux bindings body)
+  (console.log body)
   (if (null? bindings)
-  `(prog ,@body)
+  `(progn ,@body)
   (let ((name (car (car bindings)))
         (value (cadr (car bindings))))
     `((lambda (,name)
-       ,(let_star_ (cdr bindings) body))
+       ,(let_star_aux (cdr bindings) body))
       ,value))))
 
 (defmacro (let_star_ bindings . body)
