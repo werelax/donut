@@ -1,0 +1,23 @@
+(define (let_star_aux bindings body)
+  (if (null? bindings)
+  `(prog ,@body)
+  (let ((name (car (car bindings)))
+        (value (cadr (car bindings))))
+    `((lambda (,name)
+       ,(let_star_ (cdr bindings) body))
+      ,value))))
+
+(defmacro (let_star_ bindings . body)
+  (let_star_aux bindings body))
+
+(defmacro (lot bindings body)
+  `(console.log ,(if (> (get :length bindings) 2)
+                   "MUU LARGO, dijo la vaca"
+                   "Pste, dijo la serpiente")))
+
+(defmacro (let-alias bindings body)
+  `(let ,bindings ,body))
+
+(let ((akan '"AKAN!"))
+  (defmacro (scream t)
+    `(console.log ,akan ,t)))
