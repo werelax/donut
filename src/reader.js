@@ -180,6 +180,10 @@ function select_reader (stream) {
 /* Parsers */
 
 function to_js_name(string) {
+  // XXX: This function is really stupid
+  // please, improve the detection a little
+  // so (* 1 2) doesn't goes as (_star_ 1 2)
+  // or -1 as _dash_1
   return string
           .replace(/-/g, '_dash_')
           .replace(/\*/g, '_star_')
@@ -217,6 +221,7 @@ function read_token (code) {
 }
 
 function strip_comments(code) {
+  // Probably we can find something better
   return code.replace(/;;.*\n/g, '')
              .replace(/\n+/g, ' ')
              .trim();

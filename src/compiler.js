@@ -345,7 +345,6 @@ def_special_form("let", function(fname, args) {
 
 /* Syntax operators */
 
-
 function quote_rec (tree, acc) {
   acc || (acc = []);
   if (!(tree instanceof Array)) {
@@ -359,12 +358,6 @@ function quote_rec (tree, acc) {
                      acc.concat( quote_rec(head, [])));
   }
 };
-
-def_special_form("quote", function(fname, args) {
-  var thing = args[0];
-  return format("%j", quote_rec(thing, [])[0]);
-});
-
 
 // Aux function to duble-quote the strings,
 // so they doesn't become symbols in the
@@ -412,6 +405,11 @@ function arr_to_str (el) {
     return el;
   }
 }
+
+def_special_form("quote", function(fname, args) {
+  var thing = args[0];
+  return format("%j", quote_rec(thing, [])[0]);
+});
 
 def_special_form("quasiquote", function(fname, args) {
   var thing = args[0],

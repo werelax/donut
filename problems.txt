@@ -1,17 +1,10 @@
+* No se pueden poner comillas escapadas en los strings!
+
 * (define jarl [{}])
   - no compila, se hace un lío parseando {}
   - funciona con (define jarl (list {}))
 
-* (defmacro) en runtime?
-  - Por ejemplo, el clisp esto funciona:
-    ((lambda () (defmacro jarl (x) `(list ,x))))
-  - Pero lo veo bastante chungo de implementar? o no?
-  - En realidad, un 'macroexpand' en runtime es lo mismo que una función?
-  - Pero cómo vas a poder modificar syntaxis si el programa ya está compilado??
-  - Esto son rollos meta-circulares del interprete-compiler de LISP...
-  * Por ahora lo dejo fuera!
-
 * -1 se traduce por _dash_1
 
 * con (define (some a b c))
-  - Si los parámetros NO son pares, se incrusta igualmente a || (a = undefined)
+  - Si los parámetros NO son pairs, se incrusta igualmente a || (a = undefined)
