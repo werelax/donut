@@ -41,7 +41,7 @@ var add_dash_lambda_dash_to_dash_scope = (function(symbol, params, body, scope) 
 var add_dash_define_dash_to_dash_scope = (function(expr, scope) {
     return (function(symbol, value) {
         ((pair_qmark(symbol)) ? (add_dash_lambda_dash_to_dash_scope((symbol[0]), (symbol.slice(1)), value, scope)) : (add_dash_symbol_dash_to_dash_scope(symbol, (value[0]), scope)));
-        return ["define", symbol, value[0]];
+        return ["define", symbol].concat(value);
     })((expr[1]), walk_dash_code((expr["slice"](2)), true));
 });
 var add_dash_let_dash_to_dash_scope = (function(expr, scope) {

@@ -273,7 +273,7 @@ function params_helpers(params) {
                               name,
                               compile(value));
         params[i] = name;
-      } else if (param.trim() == "method_dash_call") {
+      } else if (param.trim() == ".") {
         rest = params[i+1];
         params.splice(i, 1);
         helper_code += format("%s = Array.prototype.slice.call(arguments, %d);",
@@ -288,9 +288,8 @@ function params_helpers(params) {
 
 def_special_form("lambda", function(fname, args) {
   var parsed_params = params_helpers(args[0]),
-      params = parsed_params[0].map(compile);
-
-  var params_helper_code = parsed_params[1],
+      params = parsed_params[0].map(compile),
+      params_helper_code = parsed_params[1],
       body = args.slice(1).map(compile),
       last = body.pop();
   // just to make .str_dash_join() add an ending ;
@@ -313,7 +312,12 @@ def_special_form("progn", function(fname, args) {
 function quote_rec (tree, acc) {
   acc || (acc = []);
   if (!(tree instanceof Array)) {
-    return acc.concat(tree);
+    // Don't stringify numbers!
+    if (number_qmark(tree)) {
+      return acc.concat(parseFloat(tree));
+    } else {
+      return acc.concat(tree);
+    }
   } else if (tree.length == 0) {
     return [acc];
   } else {
@@ -332,6 +336,8 @@ function unq_escape (tree) {
   if (!is_array(tree)) {
     if (tree[0] == "\"") {
       return format("%j", tree);
+    } else if (number_qmark(tree)) {
+      return parseFloat(tree);
     } else {
       return tree;
     }
@@ -355,11 +361,15 @@ function qquote_rec (tree, acc) {
   } else if (tree[0] == "unquote_dash_splice") {
     result = [format("%j", tree[0]), compile(tree[1])];
     return acc.concat([result]);
+  } else if (tree[0] == "quasiquote"
+             || tree[0] == "quote") {
+    // Don't descend to this branch!!
+    return acc.concat(format("%j", tree));
   } else {
     head = tree[0];
     tail = tree.slice(1);
     return qquote_rec(tail,
-                     acc.concat( qquote_rec(head, [])));
+                      acc.concat(qquote_rec(head, [])));
   }
 }
 

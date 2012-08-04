@@ -32,7 +32,7 @@ read_file("./lib/prelude.js", 'utf-8', function(err, data) {
       console.log("\n\n (·) DONUT 0.0.1 :: Welcome!\n\n");
 
       var repl = function() {
-        rl.question('DONUT> ', function(ans) {
+        rl.question('DONUT * ', function(ans) {
           var result, ast, final_ast, compiled;
           if (ans.trim()) try {
             ast = read(ans);

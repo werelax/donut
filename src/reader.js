@@ -56,7 +56,11 @@ function strip_delimiters(stream) {
 
 var reader_macros = [];
 
-function call_prefix_reader_macro(fn, stream) {
+function call_prefix_reader_macro(fn, symbol, stream) {
+  // If a space follows the prefix, then its not a prefix!
+  if (stream[0].match(/\s/)) {
+    return [{type: 'symbol', stream: symbol}, stream];
+  }
   var tmp = read_token(stream),
       token = tmp[0],
       remainder = tmp[1],
@@ -74,7 +78,7 @@ function call_delimited_reader_macro(fn, symbol, stream) {
 
 function def_prefix_reader_macro (symbol, fn) {
   var invocation = function(stream) {
-    return call_prefix_reader_macro(fn, stream.substr(symbol.length));
+    return call_prefix_reader_macro(fn, symbol, stream.substr(symbol.length));
   };
   return reader_macros.unshift({name: symbol, fn: invocation});
 }
@@ -105,7 +109,7 @@ def_prefix_reader_macro(":", function(stream) {
 });
 
 def_prefix_reader_macro(".", function(stream) {
-  return format("method-call %s ", stream.trim());
+  return format("method-call %j ", stream.trim());
 });
 
 def_delimited_reader_macro("[", function(stream) {

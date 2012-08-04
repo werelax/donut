@@ -9,14 +9,6 @@
 
 (eval (read-file "./lib/prelude.js" "utf-8"))
 
-
-(define (code-walker tree (acc []))
-  (cond
-    ((or (null? tree)
-         (not (pair? tree))) tree)
-    ))
-
-
 ;; Inspect and modify scope
 
 (define (create-scope? expr)
@@ -141,6 +133,14 @@
                                    scope
                                    false))))
           expanded-ast)))))
+
+;; Another approach
+
+(define (code-walker tree (acc []))
+  (cond
+    ((or (null? tree)
+         (not (pair? tree))) tree)
+    ()))
 
 (define (walk-code ast scope scope-aware)
   ;; lets get to the thing!
