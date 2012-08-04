@@ -361,8 +361,7 @@ function qquote_rec (tree, acc) {
   } else if (tree[0] == "unquote_dash_splice") {
     result = [format("%j", tree[0]), compile(tree[1])];
     return acc.concat([result]);
-  } else if (tree[0] == "quasiquote"
-             || tree[0] == "quote") {
+  } else if (tree[0] == "quasiquote") {
     // Don't descend to this branch!!
     return acc.concat(format("%j", tree));
   } else {
