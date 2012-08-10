@@ -1,8 +1,7 @@
 (define some (+ 5 5))
 
 (let ((more (* some 10)))
-  (defmacro (jarl x)
-    (list "quote" (list 1 2 (* more x)))))
+  (defmacro (jarl x) (+ some more x)))
 
 (defmacro (jarl-control x)
     (list "quote" (list 1 2 (* some x))))
@@ -38,3 +37,5 @@
   (fun a))
 
 (mac-fun "ayayay")
+
+(list "quote" (list 1 2 (* some 10)))

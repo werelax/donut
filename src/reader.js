@@ -229,6 +229,9 @@ function to_js_name(string) {
 }
 
 var parsers = {
+  'number': function(stream) {
+    return parseFloat(stream);
+  },
   'symbol': function(stream) {
     return to_js_name(stream.trim());
   },
@@ -241,7 +244,17 @@ var parsers = {
   }
 };
 
+function number_qmark(thing) {
+  return typeof(thing) == "number"
+         || (typeof(thing) == "string"
+         && !!thing.match(/^[\d\.]+$/))
+         && thing.trim() != ".";
+}
+
 function parse (token) {
+  if (number_qmark(token.stream)) {
+    token.type = "number";
+  }
   var parser = parsers[token.type];
   return parser(token.stream);
 }

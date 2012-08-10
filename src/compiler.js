@@ -312,7 +312,7 @@ def_special_form("progn", function(fname, args) {
 function quote_rec (tree, acc) {
   acc || (acc = []);
   if (!(tree instanceof Array)) {
-    // Don't stringify numbers!
+    // Don't stringify numbers! (but for JS "." is a number...)
     if (number_qmark(tree)) {
       return acc.concat(parseFloat(tree));
     } else {
