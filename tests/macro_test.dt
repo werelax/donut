@@ -1,0 +1,41 @@
+(define some (+ 5 5))
+
+(let ((more (* some 10)))
+  (defmacro (jarl x) (+ some more x)))
+
+(defmacro (jarl-control x)
+    (list "quote" (list 1 2 (* some x))))
+
+(defmacro (jorl y)
+  (let ((val (if (> y 0)
+               y
+               (jorl 1))))
+    (list "quote" (list 7 8 val))))
+
+(defmacro (fortytwo)
+  42)
+
+
+(jorl 0)
+
+(jarl-control 10)
+
+(jarl 10)
+
+(fortytwo)
+
+(console.log (fortytwo))
+
+(console.log 32)
+
+;; Still doesn't know how to bind functions
+
+(define (fun a)
+  (list "console.log" a))
+
+(defmacro (mac-fun a)
+  (fun a))
+
+(mac-fun "ayayay")
+
+(list "quote" (list 1 2 (* some 10)))

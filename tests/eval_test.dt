@@ -1,0 +1,61 @@
+(console.log "akandemorl")
+(console.log (+ (* 2 3) 10))
+(console.log [1 2 3 4])
+(console.log {a 1 b 2 c 3})
+
+(console.log '(1 2 (1 2 3) 3 4))
+
+(console.log (car '(1 2 3)))
+(console.log (cdr '(1 2 3)))
+
+(console.log (cons 1 '(2 3)))
+(console.log (cons 1 '()))
+
+(define a 2 b 1 c (+ 3 3))
+(console.log '(a b c))
+
+((lambda (a b)
+   (define sum (+ a b))
+   (console.log "The sum was: " sum))
+ 10 2)
+
+(define (sumator a b)
+  (console.log "THE SUM WAS: " (+ a b)))
+
+(sumator 1 2)
+
+(set! sumator
+     (lambda (a b)
+       (console.log "STOP BUGGING ME!")))
+
+(sumator "akandemorl")
+
+(define (make-adder n)
+  (lambda (x)
+    (+ x n)))
+
+(define plus-10 (make-adder 10))
+(console.log (plus-10 3))
+
+(define hash {})
+(set! (get :jarl hash) 1)
+(console.log (get :jarl hash))
+
+(set! hash.jorl "ayayay")
+(console.log hash.jorl)
+
+(define my-array [1 2 3 4 5])
+(console.log "peeking into my-array: " (get 1 my-array))
+
+(if true
+  (progn
+    (console.log "yay!")
+    (console.log "is a stupid expression")))
+
+(let ((a (+ 10 (* 100 (/ 1 2))))
+      (b 0.2))
+  (console.log "lexial sum => " (+ a b)))
+
+;; consing
+
+(console.log (cons 1 [2 3 4]))
