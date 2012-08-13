@@ -206,6 +206,7 @@ def_special_form("if", function(fname, args) {
   return format("((%s) ? (%s) : (%s))", condition, if_block, else_block);
 });
 
+// Maybe this could be rewritten as a macro
 def_special_form("cond", function(fname, args) {
   var expr = args[0],
       cond_rec = function(clauses) {

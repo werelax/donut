@@ -1,4 +1,6 @@
-* Once we have the macro system working, there is a BIG cleanup to do:
-  - Move as many special forms as possible to the DONUT prelude as macros
-  - Move as many operations as possible from the body of the compiler to the JAVASCRIPT compiler
-  - Look for a better way to automatically load the JAVASCRIPT AND DONUT preludes everywhere
+* Some unit testing to make sure than everything works
+* A interface to run the donut compiler in the browser?
+* Copy the best CL/Clojure macros
+* Make some interesting macro examples
+* Make a web page for showing off
+* Use the language a little, and try to improve it!
