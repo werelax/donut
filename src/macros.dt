@@ -1,11 +1,11 @@
 (define
-  compile   (get :compile (require "./compiler.js"))
+  compile   (get :compile (require (+ __dirname "/compiler.js")))
   format    (get :format  (require "util"))
   read-file (get :readFileSync (require "fs")))
 
 ;; Load the JS prelude
 
-(eval (read-file "./lib/prelude.js" "utf-8"))
+(eval (read-file (+ __dirname "/../lib/prelude.js") "utf-8"))
 
 ;; Globals
 

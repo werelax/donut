@@ -1,11 +1,11 @@
 var format = require('util').format;
-var read = require('./reader.js').read;
+var read = require(__dirname + '/reader.js').read;
 var read_file = require('fs').readFileSync;
 var is_array = require('util').isArray;
 
 /* Prelude */
 
-eval(read_file('./lib/prelude.js', 'utf-8'));
+eval(read_file(__dirname + '/../lib/prelude.js', 'utf-8'));
 
 /* global utils */
 

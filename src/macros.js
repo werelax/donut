@@ -17,10 +17,10 @@ true;
 var in_dash_pairs = (function(list) {
     return ((null_qmark(list)) ? (nil) : (cons([car(list), cadr(list)], in_dash_pairs(cddr(list)))));
 });
-var compile = (require("./compiler.js")["compile"]);
+var compile = (require(__dirname + "/compiler.js")["compile"]);
 var format = (require("util")["format"]);
 var read_dash_file = (require("fs")["readFileSync"]);;
-eval(read_dash_file("./lib/prelude.js", "utf-8"));
+eval(read_dash_file(__dirname + "/../lib/prelude.js", "utf-8"));
 var _star_macros_star_ = {};;
 var is_dash_var_qmark = (function(expr) {
     return ((car(expr) == "define") || (car(expr) == "var"));
