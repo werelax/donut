@@ -25,6 +25,10 @@ compile_dt_file(path);
 // Watcher
 fs.watch(path, function(e, name) {
   console.log(" * compiling %s...", path);
-  compile_dt_file(path);
+  try {
+    compile_dt_file(path);
+  } catch(e) {
+    console.log("##=> ERROR: %s", e);
+  }
   // TODO: Only watches 1 file!
 })

@@ -43,3 +43,11 @@
     nil
     (cons (list (car list) (cadr list))
           (in-pairs (cddr list)))))
+
+(defmacro (doto thing . body)
+  (reduce (lambda (acc thing)
+            (if (pair? thing)
+              `(,(car thing) ,acc ,@(cdr thing))
+              `(,thing ,acc)))
+          body thing))
+
