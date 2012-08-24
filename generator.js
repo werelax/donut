@@ -40,7 +40,6 @@ function generate_js (donut_code, callback) {
         callback(decorate(full_code));
 
       } catch(e) {
-        throw e;
         console.log("#==> ERROR: %s", e);
       }
     });

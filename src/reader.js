@@ -109,7 +109,7 @@ def_prefix_reader_macro(":", function(stream) {
 });
 
 def_prefix_reader_macro(".", function(stream) {
-  return format("method-call %j ", stream.trim());
+  return format("(method-call %j)", stream.trim());
 });
 
 def_delimited_reader_macro("[", function(stream) {
