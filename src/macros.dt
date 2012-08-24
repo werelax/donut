@@ -36,7 +36,7 @@
 ;; Expression builders
 
 (define (add-var-to-ctx expr ctx)
-  (format ctx (format "%s; %%%%s" (compile expr))))
+  (format ctx (format "%s; %%s" (compile expr))))
 
 (define (expand-lambda expr ctx)
   (let ((definition (car expr))
@@ -44,7 +44,7 @@
         (params (cadr definition))
         (body (cddr definition)))
     (let ((new-ctx (format ctx
-                           (format "return (function(%s) { %%%s })(%s);"
+                           (format "return (function(%s) { %%s })(%s);"
                                    (str-join params ", ")
                                    (str-join (map compile args) ", "))))
           (new-body (macro-walker body new-ctx)))
@@ -85,7 +85,7 @@
              (is-quoted? tree))
          tree)
         ;; Acumulate context horizontaly
-        ((is-var? (car tree)) (cons (car tree)
+        ((is-var? (car tree)) (cons (macro-walker (car tree) ctx)
                                     (macro-walker (cdr tree)
                                                   (add-var-to-ctx (car tree)
                                                                   ctx))))

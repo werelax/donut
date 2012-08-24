@@ -1,26 +1,7 @@
-var __faster_let_aux = (function(bindings, body) {
-    return assemble_spliced_tree([
-        ["lambda", [""],
-            ["unquote_dash_splice", map((function(binding) {
-                return assemble_spliced_tree(["var", car(binding), cadr(binding)]);
-            }), bindings)],
-            ["progn", ["unquote_dash_splice", body]]
-        ]
-    ]);
-});
-/* macro let omited */
-true;
-/* macro let_star_ omited */
-true;
-/* macro letrec omited */
-true;
-var in_dash_pairs = (function(list) {
-    return ((null_qmark(list)) ? (nil) : (cons([car(list), cadr(list)], in_dash_pairs(cddr(list)))));
-});
-var compile = (require(__dirname + "/compiler.js")["compile"]);
+var compile = (require((__dirname + "/compiler.js"))["compile"]);
 var format = (require("util")["format"]);
 var read_dash_file = (require("fs")["readFileSync"]);;
-eval(read_dash_file(__dirname + "/../lib/prelude.js", "utf-8"));
+eval(read_dash_file((__dirname + "/../lib/prelude.js"), "utf-8"));
 var _star_macros_star_ = {};;
 var is_dash_var_qmark = (function(expr) {
     return ((car(expr) == "define") || (car(expr) == "var"));
@@ -86,6 +67,6 @@ var expand_dash_macro = (function(expr, ctx) {
 });
 var macro_dash_walker = (function(tree, ctx) {
     ctx || (ctx = "%s");
-    return (((atom_qmark(tree) || null_qmark(tree) || is_dash_quoted_qmark(tree))) ? ((tree)) : (((is_dash_var_qmark(car(tree))) ? ((cons(car(tree), macro_dash_walker(cdr(tree), add_dash_var_dash_to_dash_ctx(car(tree), ctx))))) : ((((is_dash_lambda_qmark(tree)) ? ((expand_dash_lambda(tree, ctx))) : (((is_dash_macro_dash_definition_qmark(tree)) ? ((compile_dash_macro(tree, ctx))) : (((is_dash_macro_dash_expansion_qmark(tree)) ? ((expand_dash_macro(tree, ctx))) : ((cons(macro_dash_walker(car(tree), ctx), macro_dash_walker(cdr(tree), ctx))))))))))))));
+    return (((atom_qmark(tree) || null_qmark(tree) || is_dash_quoted_qmark(tree))) ? ((tree)) : (((is_dash_var_qmark(car(tree))) ? ((cons(macro_dash_walker(car(tree), ctx), macro_dash_walker(cdr(tree), add_dash_var_dash_to_dash_ctx(car(tree), ctx))))) : ((((is_dash_lambda_qmark(tree)) ? ((expand_dash_lambda(tree, ctx))) : (((is_dash_macro_dash_definition_qmark(tree)) ? ((compile_dash_macro(tree, ctx))) : (((is_dash_macro_dash_expansion_qmark(tree)) ? ((expand_dash_macro(tree, ctx))) : ((cons(macro_dash_walker(car(tree), ctx), macro_dash_walker(cdr(tree), ctx))))))))))))));
 });
 ((exports["macroexpand"]) = macro_dash_walker);
